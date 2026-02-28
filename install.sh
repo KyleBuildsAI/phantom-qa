@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# PhantomQA Installer for Google Antigravity
+# PhantomQA Installer for Google Antigravity and OpenClaw
 # Installs skills globally and/or into the current workspace
 
 set -e
@@ -11,7 +11,7 @@ GLOBAL_RULES_DIR="$HOME/.gemini/antigravity"
 
 echo ""
 echo "  ╔══════════════════════════════════════════════════╗"
-echo "  ║     PhantomQA Installer for Antigravity          ║"
+echo "  ║          PhantomQA Quick Installer               ║"
 echo "  ╚══════════════════════════════════════════════════╝"
 echo ""
 
@@ -22,12 +22,14 @@ WORKSPACE_DIR=""
 while [[ $# -gt 0 ]]; do
   case $1 in
     --global) INSTALL_MODE="global"; shift ;;
+    --openclaw) INSTALL_MODE="openclaw"; shift ;;
     --workspace) INSTALL_MODE="workspace"; shift; WORKSPACE_DIR="${1:-.}"; shift ;;
     --help)
       echo "  Usage: ./install.sh [OPTIONS]"
       echo ""
       echo "  Options:"
-      echo "    --global          Install skills globally only"
+      echo "    --global          Install Antigravity skills globally only"
+      echo "    --openclaw        Install OpenClaw skills globally only"
       echo "    --workspace PATH  Install into a specific workspace"
       echo "    (no args)         Install globally + prompt for workspace"
       echo ""
@@ -72,6 +74,34 @@ install_global() {
   fi
 }
 
+# ── OpenClaw Install ─────────────────────────────────────────────
+install_openclaw() {
+  # Determine OpenClaw skills directory
+  local OPENCLAW_SKILLS_DIR=""
+  if [ -d "$HOME/.openclaw/workspace/skills" ]; then
+    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/workspace/skills"
+  elif [ -d "$HOME/.openclaw/skills" ]; then
+    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/skills"
+  elif [ -d "$HOME/.openclaw" ]; then
+    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/workspace/skills"
+  else
+    echo "  [ERROR] OpenClaw not found (~/.openclaw/ does not exist)"
+    echo "  Install OpenClaw first: npm install -g openclaw@latest"
+    return 1
+  fi
+
+  echo "  Installing OpenClaw skills to $OPENCLAW_SKILLS_DIR ..."
+
+  mkdir -p "$OPENCLAW_SKILLS_DIR/phantom-qa/scripts"
+  mkdir -p "$OPENCLAW_SKILLS_DIR/phantom-qa-tester"
+
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/skill.md" "$OPENCLAW_SKILLS_DIR/phantom-qa/skill.md"
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/scripts/test-harness.js" "$OPENCLAW_SKILLS_DIR/phantom-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa-tester/skill.md" "$OPENCLAW_SKILLS_DIR/phantom-qa-tester/skill.md"
+
+  echo "  [OK] OpenClaw skills installed"
+}
+
 # ── Workspace Install ────────────────────────────────────────────
 install_workspace() {
   local ws="$1"
@@ -106,6 +136,9 @@ install_workspace() {
 case $INSTALL_MODE in
   global)
     install_global
+    ;;
+  openclaw)
+    install_openclaw
     ;;
   workspace)
     install_workspace "${WORKSPACE_DIR:-.}"

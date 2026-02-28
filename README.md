@@ -97,6 +97,7 @@ The agent fixes issues from the catalog, then re-runs the harness. If new issues
 | Platform | How to Use | Rules File |
 |----------|-----------|------------|
 | **Google Antigravity** | Drop into `.agent/skills/` + project root | `GEMINI.md` |
+| **OpenClaw** | Install to `~/.openclaw/workspace/skills/` | `GEMINI.md` or project rules |
 | **Claude Code** | Drop into project, rename rules file | Rename to `CLAUDE.md` |
 | **Cursor** | Drop into project, rename rules file | Rename to `.cursorrules` |
 | **Windsurf** | Drop into project, rename rules file | Rename to `.windsurfrules` |
@@ -109,47 +110,68 @@ Tested with the following models (Feb 2026):
 
 - **Claude Opus 4.6** -- Best overall. Strongest reasoning for complex fix chains and long loops.
 - **Gemini 3.1 Pro** -- Excellent. Antigravity's native model with browser subagent integration.
-- **Claude Sonnet 4.5** -- Good for faster iterations on simpler projects.
+- **Claude Sonnet 4.6** -- Good for faster iterations on simpler projects.
 
 The rules enforce the same behavior regardless of which model is active.
 
 ## Install
 
-### Quick Install (recommended)
+### One-Command Setup (recommended)
+
+```bash
+curl -sSL https://raw.githubusercontent.com/KyleBuildsAI/phantom-qa/main/setup.sh | bash
+```
+
+Or clone first:
 
 ```bash
 git clone https://github.com/KyleBuildsAI/phantom-qa.git
 cd phantom-qa
-chmod +x install.sh
-./install.sh
+chmod +x setup.sh
+./setup.sh
 ```
 
-The installer will:
-1. Copy skills to `~/.gemini/antigravity/skills/` (available in all projects)
-2. Optionally install GEMINI.md rules to a specific workspace
-3. Prompt before modifying any existing files
+The setup wizard will:
+1. Detect which AI platforms you have installed (Antigravity, OpenClaw, Claude Code, Cursor, Windsurf)
+2. Let you choose where to install
+3. Copy skills and rules to the right locations
+4. Show a completion summary with next steps
+
+### Advanced Install (install.sh)
+
+For scripting or CI/CD, use the direct installer:
+
+```bash
+./install.sh                               # Antigravity global + prompt for workspace
+./install.sh --global                      # Antigravity global only
+./install.sh --openclaw                    # OpenClaw global only
+./install.sh --workspace /path/to/project  # Workspace install only
+```
 
 ### Manual Install
 
-Copy the `.agent/` folder and `GEMINI.md` to your project root:
+Copy the files directly to your project:
 
 ```bash
-cp -r phantom-qa/.agent/ /path/to/your/project/.agent/
-cp phantom-qa/GEMINI.md /path/to/your/project/GEMINI.md
-```
+# For Antigravity
+cp -r .agent/ /path/to/your/project/.agent/
+cp GEMINI.md /path/to/your/project/GEMINI.md
 
-### Global Install Only
+# For OpenClaw
+cp -r .openclaw/skills/phantom-qa/ ~/.openclaw/workspace/skills/phantom-qa/
+cp -r .openclaw/skills/phantom-qa-tester/ ~/.openclaw/workspace/skills/phantom-qa-tester/
 
-Makes skills available across all Antigravity projects:
+# For Claude Code
+cp -r .agent/ /path/to/your/project/.agent/
+cp GEMINI.md /path/to/your/project/CLAUDE.md
 
-```bash
-./install.sh --global
-```
+# For Cursor
+cp -r .agent/ /path/to/your/project/.agent/
+cp GEMINI.md /path/to/your/project/.cursorrules
 
-### Workspace Install Only
-
-```bash
-./install.sh --workspace /path/to/your/project
+# For Windsurf
+cp -r .agent/ /path/to/your/project/.agent/
+cp GEMINI.md /path/to/your/project/.windsurfrules
 ```
 
 ## Usage
@@ -217,16 +239,37 @@ Exit codes:
 - `1` -- Errors found
 - `2` -- Critical issues found
 
-## Integration with OpenClaw
+## OpenClaw Integration
 
-PhantomQA's test harness outputs structured JSON that OpenClaw agents can consume:
+PhantomQA ships with native OpenClaw skills. After installation, two skills are available:
 
-```python
-# OpenClaw tool definition
+**phantom-qa** -- The core autonomous testing and fixing loop. Discovers issues using the test harness, fixes them one at a time, verifies each fix, checks for regressions, and loops until clean.
+
+**phantom-qa-tester** -- Interactive application testing. Systematically walks through every screen, button, form, and link in a running application.
+
+### Install for OpenClaw
+
+```bash
+# Via setup wizard (recommended)
+./setup.sh
+
+# Via install.sh
+./install.sh --openclaw
+
+# Manual
+cp -r .openclaw/skills/phantom-qa/ ~/.openclaw/workspace/skills/phantom-qa/
+cp -r .openclaw/skills/phantom-qa-tester/ ~/.openclaw/workspace/skills/phantom-qa-tester/
+```
+
+### JSON Integration
+
+The test harness outputs structured JSON that OpenClaw agents can consume programmatically:
+
+```json
 {
     "name": "phantom_qa_scan",
     "description": "Run autonomous QA scan on a codebase",
-    "command": "node .agent/skills/continuous-qa/scripts/test-harness.js",
+    "command": "node ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js",
     "output_format": "json",
     "output_file": ".phantom-qa-report.json"
 }
@@ -260,8 +303,9 @@ phantom-qa/
   QUICKREF.md                        # Copy-paste prompts for common situations
   README.md                          # This file
   LICENSE                            # MIT license
-  install.sh                         # One-command installer
-  .agent/
+  setup.sh                           # Interactive setup wizard (recommended)
+  install.sh                         # Quick/advanced installer
+  .agent/                            # Antigravity skills
     skills/
       continuous-qa/
         SKILL.md                     # Core QA loop methodology (7 phases)
@@ -269,6 +313,14 @@ phantom-qa/
           test-harness.js            # Universal test runner (any project type)
       software-tester/
         SKILL.md                     # Interactive UI/application testing
+  .openclaw/                         # OpenClaw skills
+    skills/
+      phantom-qa/
+        skill.md                     # Core QA loop (OpenClaw format)
+        scripts/
+          test-harness.js            # Universal test runner (same as above)
+      phantom-qa-tester/
+        skill.md                     # Interactive testing (OpenClaw format)
 ```
 
 ## Contributing
@@ -280,6 +332,7 @@ PRs welcome. Areas that need work:
 - CI/CD pipeline integration examples (GitHub Actions, GitLab CI)
 - Additional language support in the test harness (Ruby, PHP, C#)
 - MCP server integration for external tool access during testing
+- OpenClaw skill development and ClawHub registry publishing
 
 ## License
 

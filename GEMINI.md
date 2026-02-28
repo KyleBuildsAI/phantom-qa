@@ -85,4 +85,4 @@ When fixing a software project, address issues in this order:
 
 ## Model Compatibility
 
-These rules apply regardless of which model is powering the agent -- Gemini 3.1 Pro, Claude Opus 4.6, Claude Sonnet 4.5, or any other model available in Antigravity. The verification loop is mandatory for all models.
+These rules apply regardless of which model is powering the agent -- Gemini 3.1 Pro, Claude Opus 4.6, Claude Sonnet 4.6, or any other model available in Antigravity. The verification loop is mandatory for all models.
