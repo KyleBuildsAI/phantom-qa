@@ -8,9 +8,9 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo ""
-echo "  ╔══════════════════════════════════════════════════╗"
-echo "  ║          PhantomQA Quick Installer               ║"
-echo "  ╚══════════════════════════════════════════════════╝"
+echo "  +==================================================+"
+echo "  |          PhantomQA Quick Installer               |"
+echo "  +==================================================+"
 echo ""
 
 # Parse args
@@ -227,12 +227,12 @@ case $INSTALL_MODE in
 esac
 
 echo ""
-echo "  ════════════════════════════════════════════════════"
+echo "  ===================================================="
 echo "  Installation complete!"
 echo ""
 echo "  Next steps:"
 echo "    1. Open your project in your AI coding agent"
 echo "    2. Say: 'Run a full QA pass on this project'"
 echo "    3. The agent will find, fix, and verify everything"
-echo "  ════════════════════════════════════════════════════"
+echo "  ===================================================="
 echo ""
