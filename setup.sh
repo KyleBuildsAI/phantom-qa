@@ -140,17 +140,14 @@ SEL_OPENCLAW=false
 SEL_CLAUDE=false
 SEL_CURSOR=false
 SEL_WINDSURF=false
-SEL_WORKSPACE=""
 
 show_menu() {
-  # Pre-select detected platforms
+  # Pre-select all detected platforms (all are global installs)
   SEL_ANTIGRAVITY=$DETECTED_ANTIGRAVITY
   SEL_OPENCLAW=$DETECTED_OPENCLAW
-
-  # Project-level platforms need --workspace, so don't pre-select
-  SEL_CLAUDE=false
-  SEL_CURSOR=false
-  SEL_WINDSURF=false
+  SEL_CLAUDE=$DETECTED_CLAUDE
+  SEL_CURSOR=$DETECTED_CURSOR
+  SEL_WINDSURF=$DETECTED_WINDSURF
 
   print_step 3 5 "Choose where to install"
 
@@ -168,9 +165,9 @@ show_menu() {
 
     echo -e "    ${mark_a} 1. Google Antigravity  ${DIM}(global: ~/.gemini/antigravity/skills/)${RESET}\033[K"
     echo -e "    ${mark_o} 2. OpenClaw            ${DIM}(global: ~/.openclaw/workspace/skills/)${RESET}\033[K"
-    echo -e "    ${mark_c} 3. Claude Code         ${DIM}(project-level install)${RESET}\033[K"
-    echo -e "    ${mark_u} 4. Cursor              ${DIM}(project-level install)${RESET}\033[K"
-    echo -e "    ${mark_w} 5. Windsurf            ${DIM}(project-level install)${RESET}\033[K"
+    echo -e "    ${mark_c} 3. Claude Code         ${DIM}(global: ~/.claude/skills/)${RESET}\033[K"
+    echo -e "    ${mark_u} 4. Cursor              ${DIM}(global: ~/.cursor/skills/)${RESET}\033[K"
+    echo -e "    ${mark_w} 5. Windsurf            ${DIM}(global: ~/.codeium/windsurf/skills/)${RESET}\033[K"
     echo ""
 
     read -p "    Toggle [1-5], Enter to continue, q to quit: " choice
@@ -190,12 +187,6 @@ show_menu() {
     printf '\033[7A'
   done
 
-  # If any project-level platform selected, ask for workspace path
-  if $SEL_CLAUDE || $SEL_CURSOR || $SEL_WINDSURF; then
-    echo ""
-    read -p "    Workspace path for project-level install: " SEL_WORKSPACE
-    SEL_WORKSPACE="${SEL_WORKSPACE:-.}"
-  fi
   echo ""
 }
 
@@ -275,50 +266,109 @@ do_install_openclaw() {
   echo ""
 }
 
-do_install_project() {
-  local ws="$1" rules_name="$2" platform_name="$3"
+do_install_claude() {
+  local skills_dir="$HOME/.claude/skills"
 
-  echo -e "    ${BOLD}Installing to ${platform_name}...${RESET} ${DIM}(${ws})${RESET}"
+  echo -e "    ${BOLD}Installing to Claude Code...${RESET}"
 
-  # Resolve paths to check if workspace is the source repo itself
-  local ws_abs
-  ws_abs="$(cd "$ws" 2>/dev/null && pwd)" || ws_abs=""
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
 
-  if [ -n "$ws_abs" ] && [ "$ws_abs" = "$SCRIPT_DIR" ]; then
-    print_ok "Skills already in place ${DIM}(running from source repo)${RESET}"
-  else
-    mkdir -p "$ws/.agent/skills/continuous-qa/scripts"
-    mkdir -p "$ws/.agent/skills/software-tester/scripts"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  print_item "Copying continuous-qa skill...        ${CHECK}"
 
-    cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$ws/.agent/skills/continuous-qa/SKILL.md"
-    print_item "Copying continuous-qa skill...        ${CHECK}"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  print_item "Copying test harness...               ${CHECK}"
 
-    cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$ws/.agent/skills/continuous-qa/scripts/test-harness.js"
-    print_item "Copying test harness...               ${CHECK}"
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+  print_item "Copying software-tester skill...      ${CHECK}"
 
-    cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$ws/.agent/skills/software-tester/SKILL.md"
-    print_item "Copying software-tester skill...      ${CHECK}"
-  fi
-
-  # Copy rules with platform-specific filename
-  if [ -f "$ws/$rules_name" ]; then
+  # Install rules
+  local rules_file="$HOME/.claude/CLAUDE.md"
+  if [ -f "$rules_file" ] && [ -s "$rules_file" ]; then
     if [ -t 0 ]; then
       echo ""
-      echo -e "      ${YELLOW}!${RESET} ${rules_name} already exists"
+      echo -e "      ${YELLOW}!${RESET} CLAUDE.md already exists at ${DIM}$rules_file${RESET}"
       echo "        1) Append (Recommended)  2) Replace  3) Skip"
       read -p "        Choice [1/2/3]: " rc
       case $rc in
-        1|"") echo "" >> "$ws/$rules_name"; cat "$SCRIPT_DIR/GEMINI.md" >> "$ws/$rules_name"; print_last "Rules appended                        ${CHECK}" ;;
-        2) cp "$SCRIPT_DIR/GEMINI.md" "$ws/$rules_name"; print_last "Rules replaced                        ${CHECK}" ;;
+        1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; print_last "Rules appended                        ${CHECK}" ;;
+        2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; print_last "Rules replaced                        ${CHECK}" ;;
         *) print_last "Rules skipped                         ${DASH}" ;;
       esac
     else
-      cp "$SCRIPT_DIR/GEMINI.md" "$ws/$rules_name"
+      cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
       print_last "Rules installed                       ${CHECK}"
     fi
   else
-    cp "$SCRIPT_DIR/GEMINI.md" "$ws/$rules_name"
-    print_last "Rules installed (${rules_name})             ${CHECK}"
+    mkdir -p "$HOME/.claude"
+    cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+    print_last "Rules installed                       ${CHECK}"
+  fi
+
+  INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
+  echo ""
+}
+
+do_install_cursor() {
+  local skills_dir="$HOME/.cursor/skills"
+
+  echo -e "    ${BOLD}Installing to Cursor...${RESET}"
+
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  print_item "Copying continuous-qa skill...        ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  print_item "Copying test harness...               ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+  print_last "Copying software-tester skill...      ${CHECK}"
+
+  INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
+  echo ""
+}
+
+do_install_windsurf() {
+  local skills_dir="$HOME/.codeium/windsurf/skills"
+
+  echo -e "    ${BOLD}Installing to Windsurf...${RESET}"
+
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  print_item "Copying continuous-qa skill...        ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  print_item "Copying test harness...               ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+  print_item "Copying software-tester skill...      ${CHECK}"
+
+  # Install rules to Windsurf's global rules file
+  local rules_file="$HOME/.codeium/windsurf/memories/global_rules.md"
+  if [ -f "$rules_file" ] && [ -s "$rules_file" ]; then
+    if [ -t 0 ]; then
+      echo ""
+      echo -e "      ${YELLOW}!${RESET} global_rules.md already exists at ${DIM}$rules_file${RESET}"
+      echo "        1) Append (Recommended)  2) Replace  3) Skip"
+      read -p "        Choice [1/2/3]: " rc
+      case $rc in
+        1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; print_last "Rules appended                        ${CHECK}" ;;
+        2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; print_last "Rules replaced                        ${CHECK}" ;;
+        *) print_last "Rules skipped                         ${DASH}" ;;
+      esac
+    else
+      cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+      print_last "Rules installed                       ${CHECK}"
+    fi
+  else
+    mkdir -p "$HOME/.codeium/windsurf/memories"
+    cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+    print_last "Rules installed                       ${CHECK}"
   fi
 
   INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
@@ -330,16 +380,9 @@ run_installations() {
 
   $SEL_ANTIGRAVITY && do_install_antigravity
   $SEL_OPENCLAW    && do_install_openclaw
-
-  if $SEL_CLAUDE; then
-    do_install_project "$SEL_WORKSPACE" "CLAUDE.md" "Claude Code"
-  fi
-  if $SEL_CURSOR; then
-    do_install_project "$SEL_WORKSPACE" ".cursorrules" "Cursor"
-  fi
-  if $SEL_WINDSURF; then
-    do_install_project "$SEL_WORKSPACE" ".windsurfrules" "Windsurf"
-  fi
+  $SEL_CLAUDE      && do_install_claude
+  $SEL_CURSOR      && do_install_cursor
+  $SEL_WINDSURF    && do_install_windsurf
 
   if [ "$INSTALLED_COUNT" -eq 0 ]; then
     echo -e "    ${YELLOW}No platforms selected. Nothing installed.${RESET}"
@@ -355,7 +398,7 @@ print_summary() {
   $SEL_ANTIGRAVITY && stat_a="${CHECK}  Antigravity    2 skills + rules" || stat_a="${DASH}  Antigravity    skipped"
   $SEL_OPENCLAW    && stat_o="${CHECK}  OpenClaw       2 skills + harness" || stat_o="${DASH}  OpenClaw       skipped"
   $SEL_CLAUDE      && stat_c="${CHECK}  Claude Code    2 skills + rules" || stat_c="${DASH}  Claude Code    skipped"
-  $SEL_CURSOR      && stat_u="${CHECK}  Cursor         2 skills + rules" || stat_u="${DASH}  Cursor         skipped"
+  $SEL_CURSOR      && stat_u="${CHECK}  Cursor         2 skills" || stat_u="${DASH}  Cursor         skipped"
   $SEL_WINDSURF    && stat_w="${CHECK}  Windsurf       2 skills + rules" || stat_w="${DASH}  Windsurf       skipped"
 
   echo -e "    ${CYAN}╔═══════════════════════════════════════════════╗${RESET}"
@@ -377,9 +420,14 @@ print_summary() {
   echo -e "    ${BOLD}Run test harness manually:${RESET}"
   if $SEL_ANTIGRAVITY; then
     echo -e "      ${DIM}node ~/.gemini/antigravity/skills/continuous-qa/scripts/test-harness.js${RESET}"
-  fi
-  if $SEL_OPENCLAW; then
+  elif $SEL_OPENCLAW; then
     echo -e "      ${DIM}node ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js${RESET}"
+  elif $SEL_CLAUDE; then
+    echo -e "      ${DIM}node ~/.claude/skills/continuous-qa/scripts/test-harness.js${RESET}"
+  elif $SEL_CURSOR; then
+    echo -e "      ${DIM}node ~/.cursor/skills/continuous-qa/scripts/test-harness.js${RESET}"
+  elif $SEL_WINDSURF; then
+    echo -e "      ${DIM}node ~/.codeium/windsurf/skills/continuous-qa/scripts/test-harness.js${RESET}"
   fi
   echo ""
   echo -e "    ${DIM}Docs: https://github.com/KyleBuildsAI/phantom-qa${RESET}"
@@ -427,7 +475,6 @@ parse_flags() {
       --claude) SEL_CLAUDE=true; INTERACTIVE=false; shift ;;
       --cursor) SEL_CURSOR=true; INTERACTIVE=false; shift ;;
       --windsurf) SEL_WINDSURF=true; INTERACTIVE=false; shift ;;
-      --workspace) shift; SEL_WORKSPACE="${1:-.}"; shift ;;
       --help)
         echo ""
         echo "  PhantomQA Setup Wizard v${VERSION}"
@@ -441,10 +488,9 @@ parse_flags() {
         echo "    --all                   Install to all detected platforms"
         echo "    --antigravity           Install to Google Antigravity"
         echo "    --openclaw              Install to OpenClaw"
-        echo "    --claude                Install for Claude Code"
-        echo "    --cursor                Install for Cursor"
-        echo "    --windsurf              Install for Windsurf"
-        echo "    --workspace PATH        Project path for Claude/Cursor/Windsurf"
+        echo "    --claude                Install to Claude Code"
+        echo "    --cursor                Install to Cursor"
+        echo "    --windsurf              Install to Windsurf"
         echo ""
         echo "  One-liner install:"
         echo "    curl -sSL https://raw.githubusercontent.com/KyleBuildsAI/phantom-qa/main/setup.sh | bash"
@@ -471,6 +517,9 @@ parse_flags() {
     if ! $SEL_ANTIGRAVITY && ! $SEL_OPENCLAW && ! $SEL_CLAUDE && ! $SEL_CURSOR && ! $SEL_WINDSURF; then
       SEL_ANTIGRAVITY=$DETECTED_ANTIGRAVITY
       SEL_OPENCLAW=$DETECTED_OPENCLAW
+      SEL_CLAUDE=$DETECTED_CLAUDE
+      SEL_CURSOR=$DETECTED_CURSOR
+      SEL_WINDSURF=$DETECTED_WINDSURF
     fi
   fi
 }

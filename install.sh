@@ -1,13 +1,11 @@
 #!/bin/bash
 
-# PhantomQA Installer for Google Antigravity and OpenClaw
-# Installs skills globally and/or into the current workspace
+# PhantomQA Quick Installer
+# Installs skills globally for any supported AI coding platform
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-GLOBAL_SKILLS_DIR="$HOME/.gemini/antigravity/skills"
-GLOBAL_RULES_DIR="$HOME/.gemini/antigravity"
 
 echo ""
 echo "  ╔══════════════════════════════════════════════════╗"
@@ -16,141 +14,215 @@ echo "  ╚═══════════════════════
 echo ""
 
 # Parse args
-INSTALL_MODE="both"
-WORKSPACE_DIR=""
+INSTALL_MODE=""
 
 while [[ $# -gt 0 ]]; do
   case $1 in
-    --global) INSTALL_MODE="global"; shift ;;
+    --global|--antigravity) INSTALL_MODE="antigravity"; shift ;;
     --openclaw) INSTALL_MODE="openclaw"; shift ;;
-    --workspace) INSTALL_MODE="workspace"; shift; WORKSPACE_DIR="${1:-.}"; shift ;;
+    --claude) INSTALL_MODE="claude"; shift ;;
+    --cursor) INSTALL_MODE="cursor"; shift ;;
+    --windsurf) INSTALL_MODE="windsurf"; shift ;;
+    --all) INSTALL_MODE="all"; shift ;;
     --help)
       echo "  Usage: ./install.sh [OPTIONS]"
       echo ""
       echo "  Options:"
-      echo "    --global          Install Antigravity skills globally only"
-      echo "    --openclaw        Install OpenClaw skills globally only"
-      echo "    --workspace PATH  Install into a specific workspace"
-      echo "    (no args)         Install globally + prompt for workspace"
+      echo "    --antigravity     Install to Google Antigravity (~/.gemini/antigravity/skills/)"
+      echo "    --openclaw        Install to OpenClaw (~/.openclaw/workspace/skills/)"
+      echo "    --claude          Install to Claude Code (~/.claude/skills/)"
+      echo "    --cursor          Install to Cursor (~/.cursor/skills/)"
+      echo "    --windsurf        Install to Windsurf (~/.codeium/windsurf/skills/)"
+      echo "    --all             Install to all detected platforms"
+      echo "    (no args)         Install to Antigravity (default)"
       echo ""
       exit 0
       ;;
-    *) WORKSPACE_DIR="$1"; shift ;;
+    *) shift ;;
   esac
 done
 
-# ── Global Install ───────────────────────────────────────────────
-install_global() {
-  echo "  Installing globally to $GLOBAL_SKILLS_DIR ..."
+# Default to antigravity if no flag specified
+INSTALL_MODE="${INSTALL_MODE:-antigravity}"
 
-  mkdir -p "$GLOBAL_SKILLS_DIR/continuous-qa/scripts"
-  mkdir -p "$GLOBAL_SKILLS_DIR/software-tester/scripts"
+# ── Antigravity Install ─────────────────────────────────────────
+install_antigravity() {
+  local skills_dir="$HOME/.gemini/antigravity/skills"
+  local rules_dir="$HOME/.gemini/antigravity"
 
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$GLOBAL_SKILLS_DIR/continuous-qa/SKILL.md"
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$GLOBAL_SKILLS_DIR/continuous-qa/scripts/test-harness.js"
-  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$GLOBAL_SKILLS_DIR/software-tester/SKILL.md"
+  echo "  Installing to Antigravity ($skills_dir) ..."
 
-  echo "  [OK] Global skills installed"
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
 
-  # Install global rules (append, don't overwrite)
-  GLOBAL_RULES_FILE="$GLOBAL_RULES_DIR/GEMINI.md"
-  if [ -f "$GLOBAL_RULES_FILE" ]; then
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+
+  echo "  [OK] Antigravity skills installed"
+
+  # Install global rules
+  local rules_file="$rules_dir/GEMINI.md"
+  if [ -f "$rules_file" ]; then
     echo ""
-    echo "  Global GEMINI.md already exists at $GLOBAL_RULES_FILE"
+    echo "  GEMINI.md already exists at $rules_file"
     echo "  Would you like to:"
     echo "    1) Append PhantomQA rules (Recommended)"
     echo "    2) Replace with PhantomQA rules"
-    echo "    3) Skip (don't modify global rules)"
+    echo "    3) Skip (don't modify rules)"
     read -p "  Choice [1/2/3]: " choice
     case $choice in
-      1|"") echo "" >> "$GLOBAL_RULES_FILE"; cat "$SCRIPT_DIR/GEMINI.md" >> "$GLOBAL_RULES_FILE"; echo "  [OK] Rules appended" ;;
-      2) cp "$SCRIPT_DIR/GEMINI.md" "$GLOBAL_RULES_FILE"; echo "  [OK] Rules replaced" ;;
-      3) echo "  [SKIP] Global rules unchanged" ;;
+      1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; echo "  [OK] Rules appended" ;;
+      2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; echo "  [OK] Rules replaced" ;;
+      3) echo "  [SKIP] Rules unchanged" ;;
     esac
   else
-    mkdir -p "$GLOBAL_RULES_DIR"
-    cp "$SCRIPT_DIR/GEMINI.md" "$GLOBAL_RULES_FILE"
-    echo "  [OK] Global rules installed"
+    mkdir -p "$rules_dir"
+    cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+    echo "  [OK] Rules installed"
   fi
 }
 
-# ── OpenClaw Install ─────────────────────────────────────────────
+# ── OpenClaw Install ────────────────────────────────────────────
 install_openclaw() {
-  # Determine OpenClaw skills directory
-  local OPENCLAW_SKILLS_DIR=""
+  local skills_dir=""
   if [ -d "$HOME/.openclaw/workspace/skills" ]; then
-    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/workspace/skills"
+    skills_dir="$HOME/.openclaw/workspace/skills"
   elif [ -d "$HOME/.openclaw/skills" ]; then
-    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/skills"
+    skills_dir="$HOME/.openclaw/skills"
   elif [ -d "$HOME/.openclaw" ]; then
-    OPENCLAW_SKILLS_DIR="$HOME/.openclaw/workspace/skills"
+    skills_dir="$HOME/.openclaw/workspace/skills"
   else
     echo "  [ERROR] OpenClaw not found (~/.openclaw/ does not exist)"
     echo "  Install OpenClaw first: npm install -g openclaw@latest"
     return 1
   fi
 
-  echo "  Installing OpenClaw skills to $OPENCLAW_SKILLS_DIR ..."
+  echo "  Installing to OpenClaw ($skills_dir) ..."
 
-  mkdir -p "$OPENCLAW_SKILLS_DIR/phantom-qa/scripts"
-  mkdir -p "$OPENCLAW_SKILLS_DIR/phantom-qa-tester"
+  mkdir -p "$skills_dir/phantom-qa/scripts"
+  mkdir -p "$skills_dir/phantom-qa-tester"
 
-  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/skill.md" "$OPENCLAW_SKILLS_DIR/phantom-qa/skill.md"
-  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/scripts/test-harness.js" "$OPENCLAW_SKILLS_DIR/phantom-qa/scripts/test-harness.js"
-  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa-tester/skill.md" "$OPENCLAW_SKILLS_DIR/phantom-qa-tester/skill.md"
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/skill.md" "$skills_dir/phantom-qa/skill.md"
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/scripts/test-harness.js" "$skills_dir/phantom-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa-tester/skill.md" "$skills_dir/phantom-qa-tester/skill.md"
 
   echo "  [OK] OpenClaw skills installed"
 }
 
-# ── Workspace Install ────────────────────────────────────────────
-install_workspace() {
-  local ws="$1"
-  echo ""
-  echo "  Installing to workspace: $ws"
+# ── Claude Code Install ─────────────────────────────────────────
+install_claude() {
+  local skills_dir="$HOME/.claude/skills"
 
-  mkdir -p "$ws/.agent/skills/continuous-qa/scripts"
-  mkdir -p "$ws/.agent/skills/software-tester/scripts"
+  echo "  Installing to Claude Code ($skills_dir) ..."
 
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$ws/.agent/skills/continuous-qa/SKILL.md"
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$ws/.agent/skills/continuous-qa/scripts/test-harness.js"
-  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$ws/.agent/skills/software-tester/SKILL.md"
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
 
-  echo "  [OK] Workspace skills installed"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
 
-  # Copy GEMINI.md to workspace root
-  if [ -f "$ws/GEMINI.md" ]; then
-    echo "  Workspace GEMINI.md already exists."
-    read -p "  Append PhantomQA rules? [y/N]: " confirm
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-      echo "" >> "$ws/GEMINI.md"
-      cat "$SCRIPT_DIR/GEMINI.md" >> "$ws/GEMINI.md"
-      echo "  [OK] Rules appended to workspace"
-    fi
+  echo "  [OK] Claude Code skills installed"
+
+  # Install global rules
+  local rules_file="$HOME/.claude/CLAUDE.md"
+  if [ -f "$rules_file" ]; then
+    echo ""
+    echo "  CLAUDE.md already exists at $rules_file"
+    echo "  Would you like to:"
+    echo "    1) Append PhantomQA rules (Recommended)"
+    echo "    2) Replace with PhantomQA rules"
+    echo "    3) Skip (don't modify rules)"
+    read -p "  Choice [1/2/3]: " choice
+    case $choice in
+      1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; echo "  [OK] Rules appended" ;;
+      2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; echo "  [OK] Rules replaced" ;;
+      3) echo "  [SKIP] Rules unchanged" ;;
+    esac
   else
-    cp "$SCRIPT_DIR/GEMINI.md" "$ws/GEMINI.md"
-    echo "  [OK] Workspace rules installed"
+    mkdir -p "$HOME/.claude"
+    cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+    echo "  [OK] Rules installed"
   fi
 }
 
-# ── Run Install ──────────────────────────────────────────────────
+# ── Cursor Install ──────────────────────────────────────────────
+install_cursor() {
+  local skills_dir="$HOME/.cursor/skills"
+
+  echo "  Installing to Cursor ($skills_dir) ..."
+
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+
+  echo "  [OK] Cursor skills installed"
+}
+
+# ── Windsurf Install ────────────────────────────────────────────
+install_windsurf() {
+  local skills_dir="$HOME/.codeium/windsurf/skills"
+
+  echo "  Installing to Windsurf ($skills_dir) ..."
+
+  mkdir -p "$skills_dir/continuous-qa/scripts"
+  mkdir -p "$skills_dir/software-tester/scripts"
+
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
+  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$skills_dir/continuous-qa/scripts/test-harness.js"
+  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
+
+  echo "  [OK] Windsurf skills installed"
+
+  # Install global rules
+  local rules_file="$HOME/.codeium/windsurf/memories/global_rules.md"
+  if [ -f "$rules_file" ]; then
+    echo ""
+    echo "  global_rules.md already exists at $rules_file"
+    echo "  Would you like to:"
+    echo "    1) Append PhantomQA rules (Recommended)"
+    echo "    2) Replace with PhantomQA rules"
+    echo "    3) Skip (don't modify rules)"
+    read -p "  Choice [1/2/3]: " choice
+    case $choice in
+      1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; echo "  [OK] Rules appended" ;;
+      2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; echo "  [OK] Rules replaced" ;;
+      3) echo "  [SKIP] Rules unchanged" ;;
+    esac
+  else
+    mkdir -p "$HOME/.codeium/windsurf/memories"
+    cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"
+    echo "  [OK] Rules installed"
+  fi
+}
+
+# ── Run Install ─────────────────────────────────────────────────
 case $INSTALL_MODE in
-  global)
-    install_global
+  antigravity)
+    install_antigravity
     ;;
   openclaw)
     install_openclaw
     ;;
-  workspace)
-    install_workspace "${WORKSPACE_DIR:-.}"
+  claude)
+    install_claude
     ;;
-  both)
-    install_global
-    echo ""
-    read -p "  Also install to a workspace? [y/N]: " confirm
-    if [[ "$confirm" =~ ^[Yy]$ ]]; then
-      read -p "  Workspace path (or . for current dir): " ws_path
-      install_workspace "${ws_path:-.}"
-    fi
+  cursor)
+    install_cursor
+    ;;
+  windsurf)
+    install_windsurf
+    ;;
+  all)
+    [ -d "$HOME/.gemini" ]    && install_antigravity && echo ""
+    [ -d "$HOME/.openclaw" ]  && install_openclaw && echo ""
+    (command -v claude &>/dev/null || [ -d "$HOME/.claude" ])    && install_claude && echo ""
+    (command -v cursor &>/dev/null || [ -d "$HOME/.cursor" ])    && install_cursor && echo ""
+    (command -v windsurf &>/dev/null || [ -d "$HOME/.codeium" ]) && install_windsurf && echo ""
     ;;
 esac
 
@@ -159,13 +231,8 @@ echo "  ════════════════════════
 echo "  Installation complete!"
 echo ""
 echo "  Next steps:"
-echo "    1. Open your project in Antigravity"
-echo "    2. In the agent chat, say:"
-echo "       'Run a full QA pass on this project. Find and fix every issue.'"
-echo "    3. The agent will use the continuous-qa skill automatically"
-echo "    4. It will loop until everything is clean"
-echo ""
-echo "  To run the test harness manually:"
-echo "    node .agent/skills/continuous-qa/scripts/test-harness.js"
+echo "    1. Open your project in your AI coding agent"
+echo "    2. Say: 'Run a full QA pass on this project'"
+echo "    3. The agent will find, fix, and verify everything"
 echo "  ════════════════════════════════════════════════════"
 echo ""
