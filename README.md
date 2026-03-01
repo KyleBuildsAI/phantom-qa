@@ -1,118 +1,78 @@
 # PhantomQA
 
-**Autonomous software testing and fixing loop for AI coding agents.**
+**Make your AI coding agent actually finish the job.**
 
-PhantomQA forces AI agents to actually verify their work, keep going until everything is clean, and never claim "done" without proof. Built for Google Antigravity, compatible with Claude Code, Cursor, and any agent-first IDE.
+You know the problem: you ask an AI agent to test and fix your project. It makes a few changes, says "done," and stops. But it never checked if the fixes actually worked. It never re-ran the tests. It never looked for more issues. You end up babysitting it, saying "keep going" and "did you actually verify that?" over and over.
+
+PhantomQA fixes this. It's a drop-in add-on that forces your AI agent into a loop: find issues, fix them, prove the fixes work, check for new issues, and keep going until everything is clean. The agent literally cannot say "done" without showing you proof.
 
 ---
 
-## The Problem
+## How It Works (The Short Version)
 
-Every AI coding agent has the same failure mode. You ask it to test and fix your software. It makes 5-7 changes, says "the changes have been applied," and stops. It never:
-
-- Verified the fixes actually worked
-- Re-ran the tests to confirm
-- Checked if its fixes broke something else
-- Looked for more issues beyond the first handful
-- Showed you terminal output proving anything
-
-You end up babysitting the agent, repeatedly saying "keep going" and "did you actually check that?" That defeats the entire purpose of autonomous agents.
-
-## The Solution
-
-PhantomQA is a skill + rules package that wraps any AI agent in a mandatory feedback loop:
+Once installed, PhantomQA teaches your AI agent to follow this cycle:
 
 ```
-DISCOVER --> FIX --> VERIFY --> REASSESS --> (loop or complete)
-    ^                                            |
-    └────────────── new issues found ────────────┘
+FIND ISSUES --> FIX THEM --> PROVE IT WORKS --> CHECK AGAIN --> (repeat or done)
 ```
 
-The agent cannot exit this loop without concrete terminal output proving every fix works and the full test suite passes clean. No more "I believe the changes should work." Prove it.
+1. **Find** -- The agent scans your entire project for problems (broken code, placeholder text, failing tests, security issues, and more)
+2. **Fix** -- It fixes each issue one at a time
+3. **Prove** -- After each fix, it re-runs the test to prove the fix actually worked
+4. **Check again** -- It looks for new problems that may have appeared
+5. **Repeat** -- If anything is still broken, it goes back to step 1
+6. **Done** -- Only when everything passes does it stop, and it shows you the proof
 
-## How It Works
+No more "I believe the changes should work." It has to prove it.
 
-PhantomQA has three layers that work together:
+---
 
-### Layer 1: Rules (GEMINI.md)
+## What Does PhantomQA Actually Check?
 
-A rules file that overrides the agent's default behavior. It sits at your project root or in your global Antigravity config. Key enforcements:
+The built-in scanner automatically detects what kind of project you have (JavaScript, Python, Go, Rust, or Java) and looks for:
 
-- **Must show terminal output** proving each fix works (not just "changes applied")
-- **Must re-run tests after every change** to catch regressions
-- **Must output status checkpoints every 5 fixes** so you can track progress
-- **Cannot say "done"** without a final clean test run with full output shown
-- **Cannot stop at an arbitrary number** -- if there are 50 issues, it fixes 50 issues
-- **Must check for regressions** after each batch of fixes
-- **Priority ordering** -- critical issues first, polish last
+| Category | Examples |
+|----------|---------|
+| **Placeholder content** | "Lorem ipsum", TODO comments, fake emails like test@test.com, "Coming soon" text, dummy names |
+| **Code quality** | Debug statements left in the code, empty error handling, hardcoded passwords or API keys |
+| **Build errors** | Code that won't compile or start |
+| **Failing tests** | Any existing tests that don't pass |
+| **Missing dependencies** | Packages that need to be installed, security vulnerabilities in packages |
+| **Project structure** | Missing README, missing .gitignore, exposed secret files |
+| **Runtime errors** | Code that crashes when you try to run it |
+| **Style issues** | Linting errors, TypeScript type errors |
 
-### Layer 2: Skills (.agent/skills/)
+It finds all of these automatically. You don't need to configure anything.
 
-Two Antigravity Skills that the agent loads automatically based on intent:
+---
 
-**continuous-qa** -- The core QA methodology. Defines a 7-phase loop:
-1. Discover (run test harness, inspect code)
-2. Categorize (group by severity)
-3. Fix (one at a time, explain each change)
-4. Verify (re-run the exact test that found the issue)
-5. Regression Check (full suite again)
-6. Reassess (new issues? back to phase 1)
-7. Final Verification (one last clean run with proof)
+## What Platforms Does It Work With?
 
-**software-tester** -- For testing running applications. Instructs the agent to use Antigravity's browser subagent to click every button, submit every form, navigate every link, and verify the UI works. Covers valid input, invalid input, empty submissions, state persistence, and screenshot-based proof.
+PhantomQA works with all major AI coding platforms:
 
-### Layer 3: Test Harness (test-harness.js)
+| Platform | Supported |
+|----------|-----------|
+| **Google Antigravity** | Yes (full support, including browser testing) |
+| **OpenClaw** | Yes (native skills included) |
+| **Claude Code** | Yes |
+| **Cursor** | Yes |
+| **Windsurf** | Yes |
 
-A universal testing script the agent runs to discover issues. Auto-detects your project type (JavaScript, Python, Go, Rust, Java) and runs 8 categories of checks:
+The setup wizard handles the differences between platforms automatically. You just pick which ones you use.
 
-| Check | What It Finds |
-|-------|--------------|
-| Placeholders | Lorem ipsum, TODO, FIXME, test@test, example.com, "coming soon", dummy names, suspiciously round prices, TBD/TBA markers (25+ patterns) |
-| Code Quality | console.log debug statements, empty catch blocks, hardcoded secrets/passwords/API keys |
-| Build | Compilation errors, build failures |
-| Tests | Failing unit/integration tests |
-| Dependencies | Missing node_modules, npm audit vulnerabilities, missing Python packages |
-| Structure | Missing README, missing .gitignore, exposed .env files, empty directories |
-| Runtime | Syntax errors in entry points, import failures |
-| Linting | TypeScript errors, ESLint violations, Ruff/flake8 issues |
+---
 
-Outputs a structured issue catalog the agent can parse:
-```
-=== ISSUE CATALOG ===
-CRITICAL (2):
-  [ ] C-001: Hardcoded API key in config.js [config.js:14]
-       Fix: Move to environment variable
-  [ ] C-002: Build error: Cannot find module './utils'
-       Fix: Fix the import path
+## What AI Models Work Best?
 
-ERRORS (3):
-  [ ] E-001: 2 test(s) failing
-  ...
-```
+Tested with these models (Feb 2026):
 
-The agent fixes issues from the catalog, then re-runs the harness. If new issues appear, the loop continues.
+- **Claude Opus 4.6** -- Best overall. Handles long, complex testing sessions.
+- **Gemini 3.1 Pro** -- Excellent. Works great with Antigravity's built-in browser testing.
+- **Claude Sonnet 4.6** -- Good for faster runs on simpler projects.
 
-## Supported Platforms
+PhantomQA works the same way regardless of which model you're using.
 
-| Platform | How to Use | Rules File |
-|----------|-----------|------------|
-| **Google Antigravity** | Drop into `.agent/skills/` + project root | `GEMINI.md` |
-| **OpenClaw** | Install to `~/.openclaw/workspace/skills/` | `GEMINI.md` or project rules |
-| **Claude Code** | Drop into project, rename rules file | Rename to `CLAUDE.md` |
-| **Cursor** | Drop into project, rename rules file | Rename to `.cursorrules` |
-| **Windsurf** | Drop into project, rename rules file | Rename to `.windsurfrules` |
-
-The skills and test harness work identically across all platforms. Only the rules filename changes.
-
-## Supported Models
-
-Tested with the following models (Feb 2026):
-
-- **Claude Opus 4.6** -- Best overall. Strongest reasoning for complex fix chains and long loops.
-- **Gemini 3.1 Pro** -- Excellent. Antigravity's native model with browser subagent integration.
-- **Claude Sonnet 4.6** -- Good for faster iterations on simpler projects.
-
-The rules enforce the same behavior regardless of which model is active.
+---
 
 ## Install
 
@@ -150,7 +110,7 @@ bash setup.sh
 ```
 
 That's it. The setup wizard will walk you through the rest:
-1. It detects which AI platforms you have installed (Antigravity, OpenClaw, Claude Code, Cursor, Windsurf)
+1. It detects which AI platforms you have installed
 2. It lets you choose where to install
 3. It copies everything to the right places automatically
 4. It shows you what to do next when it's done
@@ -169,7 +129,8 @@ curl -sSL https://raw.githubusercontent.com/KyleBuildsAI/phantom-qa/main/setup.s
 
 ---
 
-### Advanced Install (for scripting and CI/CD)
+<details>
+<summary><strong>Advanced Install (for scripting and CI/CD)</strong></summary>
 
 The `install.sh` script supports direct flags for automation:
 
@@ -180,7 +141,7 @@ The `install.sh` script supports direct flags for automation:
 ./install.sh --workspace /path/to/project  # Workspace install only
 ```
 
----
+</details>
 
 <details>
 <summary><strong>Manual Install (copy files yourself)</strong></summary>
@@ -211,39 +172,45 @@ cp GEMINI.md /path/to/your/project/.windsurfrules
 
 </details>
 
-## Usage
+---
 
-### Start a QA Pass
+## How to Use It
 
-Open your project in Antigravity and say:
+After installing, open your project in your AI coding agent and tell it what to do. Here are ready-to-use prompts you can copy and paste directly into the chat.
+
+### Run a Full QA Pass
 
 > Run a full QA pass on this project. Find every issue -- placeholder content, broken buttons, console errors, missing validation, dead links, everything. Fix each issue, verify each fix works by re-running the test, and keep going until the test harness comes back clean. Show me terminal output at every step.
 
-### If the Agent Stops Early
+### If the Agent Stops Too Early
+
+Sometimes the agent will stop before it's actually finished. Paste this:
 
 > You stopped without running the verification loop. Run the test harness again and show me the output. If there are remaining issues, continue fixing them.
 
-### If the Agent Claims "Done" Without Proof
+### If the Agent Says "Done" But Didn't Show Proof
 
 > You said the changes were made but didn't verify them. Run the application right now and show me the terminal output proving it works.
 
-### Force a Final Signoff
+### Force a Final Check
 
 > Run the complete test harness one final time. Show me the full output. If there are zero failures and zero critical warnings, we're done. If not, keep fixing.
 
-### Focus on a Specific Category
+### Focus on Just Placeholder Content
 
 > Focus on all placeholder content in the project. Scan every file for lorem ipsum, TODO markers, test emails, example.com references, and any dummy data. Replace each one with real content appropriate for the context.
 
-### Interactive UI Testing
+### Test the UI (Click Through Everything)
 
 > Start the application and test every screen. Click every button, submit every form with both valid and invalid data, navigate every link. Fix everything that fails. Take screenshots as proof.
 
-See `QUICKREF.md` for the full list of copy-paste prompts.
+See `QUICKREF.md` for more prompts.
 
-## Status Checkpoints
+---
 
-The agent outputs these every 5 fixes so you can track progress without micromanaging:
+## What You'll See While It's Working
+
+The agent will show you progress checkpoints every 5 fixes, so you know it's still working and how much is left:
 
 ```
 === STATUS CHECKPOINT ===
@@ -256,49 +223,25 @@ Next action: Fixing W-005 (dead link in footer)
 =========================
 ```
 
-## Test Harness CLI
+You don't need to do anything when you see these. They're just status updates so you can follow along.
 
-Run the test harness manually outside of Antigravity:
-
-```bash
-# Run in current directory
-node .agent/skills/continuous-qa/scripts/test-harness.js
-
-# Run against a different project
-node .agent/skills/continuous-qa/scripts/test-harness.js --project-root /path/to/project
-
-# View the JSON report
-cat .phantom-qa-report.json | jq .
-```
-
-Exit codes:
-- `0` -- All clear
-- `1` -- Errors found
-- `2` -- Critical issues found
+---
 
 ## OpenClaw Integration
 
-PhantomQA ships with native OpenClaw skills. After installation, two skills are available:
+If you use OpenClaw, PhantomQA includes two native skills that install automatically:
 
-**phantom-qa** -- The core autonomous testing and fixing loop. Discovers issues using the test harness, fixes them one at a time, verifies each fix, checks for regressions, and loops until clean.
+- **phantom-qa** -- The core testing and fixing loop
+- **phantom-qa-tester** -- Interactive app testing (clicks through your UI)
 
-**phantom-qa-tester** -- Interactive application testing. Systematically walks through every screen, button, form, and link in a running application.
-
-### Install for OpenClaw
+The setup wizard handles OpenClaw installation. You can also install manually:
 
 ```bash
-# Via setup wizard (recommended)
-./setup.sh
-
-# Via install.sh
 ./install.sh --openclaw
-
-# Manual
-cp -r .openclaw/skills/phantom-qa/ ~/.openclaw/workspace/skills/phantom-qa/
-cp -r .openclaw/skills/phantom-qa-tester/ ~/.openclaw/workspace/skills/phantom-qa-tester/
 ```
 
-### JSON Integration
+<details>
+<summary><strong>JSON integration for advanced users</strong></summary>
 
 The test harness outputs structured JSON that OpenClaw agents can consume programmatically:
 
@@ -312,9 +255,64 @@ The test harness outputs structured JSON that OpenClaw agents can consume progra
 }
 ```
 
-An OpenClaw agent can run the harness, parse the JSON report, fix issues programmatically, re-run the harness, and loop until clean -- fully autonomous.
+</details>
 
-## Customization
+---
+
+## Under the Hood
+
+<details>
+<summary><strong>How PhantomQA works technically</strong></summary>
+
+PhantomQA has three layers that work together:
+
+### Layer 1: Rules (GEMINI.md)
+
+A rules file that overrides the agent's default behavior. Key enforcements:
+
+- Must show terminal output proving each fix works
+- Must re-run tests after every change to catch regressions
+- Must output status checkpoints every 5 fixes
+- Cannot say "done" without a final clean test run
+- Cannot stop at an arbitrary number of fixes
+- Must fix critical issues first, polish last
+
+### Layer 2: Skills
+
+Two skills the agent loads automatically based on what you ask it to do:
+
+**continuous-qa** -- The core QA methodology (7-phase loop: Discover, Categorize, Fix, Verify, Regression Check, Reassess, Final Verification)
+
+**software-tester** -- For testing running applications via browser interaction (clicks every button, submits every form, navigates every link)
+
+### Layer 3: Test Harness (test-harness.js)
+
+A universal testing script that auto-detects your project type and runs 8 categories of checks. Outputs a structured issue catalog the agent can parse and work through systematically.
+
+</details>
+
+<details>
+<summary><strong>Running the test harness manually</strong></summary>
+
+You can run the scanner yourself without an AI agent:
+
+```bash
+# Run in the current project folder
+node .agent/skills/continuous-qa/scripts/test-harness.js
+
+# Run against a different project
+node .agent/skills/continuous-qa/scripts/test-harness.js --project-root /path/to/project
+
+# View the full report
+cat .phantom-qa-report.json
+```
+
+Exit codes: `0` = all clear, `1` = errors found, `2` = critical issues found.
+
+</details>
+
+<details>
+<summary><strong>Customization</strong></summary>
 
 ### Add Custom Placeholder Patterns
 
@@ -330,9 +328,12 @@ Edit `GEMINI.md` to change what counts as critical vs warning for your project.
 
 ### Add Project-Specific Skills
 
-Create new skills in `.agent/skills/your-skill-name/SKILL.md` following the same format. Antigravity auto-detects them by matching the description against user intent.
+Create new skills in `.agent/skills/your-skill-name/SKILL.md` following the same format. The agent auto-detects them by matching the description against what you ask it to do.
 
-## File Structure
+</details>
+
+<details>
+<summary><strong>File structure</strong></summary>
 
 ```
 phantom-qa/
@@ -359,6 +360,10 @@ phantom-qa/
       phantom-qa-tester/
         skill.md                     # Interactive testing (OpenClaw format)
 ```
+
+</details>
+
+---
 
 ## Contributing
 
