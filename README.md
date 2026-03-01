@@ -105,9 +105,16 @@ Copy and paste these lines one at a time:
 ```bash
 cd phantom-qa
 ```
-```bash
-bash setup.sh
-```
+
+Then run the setup wizard. **Use the command for your operating system:**
+
+| OS | Command |
+|----|---------|
+| **Mac / Linux** | `bash setup.sh` |
+| **Windows (PowerShell or CMD)** | `& "C:\Program Files\Git\bin\bash.exe" setup.sh` |
+| **Windows (Git Bash)** | `./setup.sh` |
+
+> **Windows note:** If you just type `bash setup.sh` on Windows, it may try to use WSL instead of Git Bash and give an error. The command above uses Git Bash directly, which is what you want.
 
 That's it. The setup wizard will walk you through the rest:
 1. It detects which AI platforms you have installed
@@ -115,7 +122,7 @@ That's it. The setup wizard will walk you through the rest:
 3. It copies everything to the right places automatically
 4. It shows you what to do next when it's done
 
-> **Don't have git installed?** You can also download PhantomQA as a ZIP file. Click the green **Code** button at the top of this page, then **Download ZIP**. Unzip it, open a terminal inside the folder, and run `bash setup.sh`.
+> **Don't have git installed?** You can also download PhantomQA as a ZIP file. Click the green **Code** button at the top of this page, then **Download ZIP**. Unzip it, open a terminal inside the folder, and run the setup command for your OS from the table above.
 
 ---
 
