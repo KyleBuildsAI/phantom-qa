@@ -480,6 +480,22 @@ See `QUICKREF.md` for even more prompts.
 
 ## Troubleshooting
 
+### Windows: "Failed to attach disk" or WSL error when running bash setup.sh
+
+On Windows, typing `bash setup.sh` can launch WSL (Windows Subsystem for Linux) instead of Git Bash. If you see an error like:
+
+```
+Failed to attach disk ... ext4.vhdx ... ERROR_PATH_NOT_FOUND
+```
+
+Use Git Bash directly instead. In PowerShell or CMD, run:
+
+```
+& "C:\Program Files\Git\bin\bash.exe" setup.sh
+```
+
+Or right-click the `phantom-qa` folder in File Explorer, select **Open Git Bash here**, and type `./setup.sh`.
+
 ### "Command not found" when running bash setup.sh
 
 Make sure you're inside the `phantom-qa` folder first:
