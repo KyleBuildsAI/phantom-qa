@@ -150,16 +150,14 @@ You should see text that starts with "# Project Rules" and mentions "Continuous 
 
 **Claude Code:**
 
-Go to the project folder where you installed PhantomQA and run:
-
 ```bash
-ls .agent/skills/continuous-qa/SKILL.md
+ls ~/.claude/skills/continuous-qa/SKILL.md
 ```
 
 Also check the rules file:
 
 ```bash
-cat CLAUDE.md
+cat ~/.claude/CLAUDE.md
 ```
 
 You should see the same "Continuous Verification Loop" rules.
@@ -172,19 +170,22 @@ ls ~/.openclaw/workspace/skills/phantom-qa/skill.md
 
 If it prints the path, you're good.
 
-**Cursor / Windsurf:**
-
-Go to the project folder and check:
+**Cursor:**
 
 ```bash
-ls .agent/skills/continuous-qa/SKILL.md
+ls ~/.cursor/skills/continuous-qa/SKILL.md
 ```
 
-And check for the rules file (`.cursorrules` for Cursor, `.windsurfrules` for Windsurf):
+**Windsurf:**
 
 ```bash
-ls .cursorrules    # Cursor
-ls .windsurfrules  # Windsurf
+ls ~/.codeium/windsurf/skills/continuous-qa/SKILL.md
+```
+
+Also check the rules file:
+
+```bash
+cat ~/.codeium/windsurf/memories/global_rules.md
 ```
 
 ---
@@ -260,36 +261,22 @@ Antigravity automatically reads skills from `~/.gemini/antigravity/skills/` and 
 
 ## How to Use It With Claude Code
 
-**Step 1: Install PhantomQA into your project**
+**Step 1: Make sure PhantomQA is installed for Claude Code**
 
-Open a terminal, navigate to your project folder, and run the setup wizard:
+If you haven't already, run the setup wizard (see Install above). When the wizard shows the platform list, make sure **Claude Code** is selected (it should be auto-detected if you have Claude Code installed). Press Enter and let it finish.
 
-```bash
-cd /path/to/your/project
-```
+The setup wizard copies the skills to `~/.claude/skills/` and creates a rules file at `~/.claude/CLAUDE.md`. These are global -- they work in every project automatically.
 
-Then clone PhantomQA (if you haven't already) and run setup:
+**Step 2: Open any project in Claude Code**
 
-```bash
-git clone https://github.com/KyleBuildsAI/phantom-qa.git /tmp/phantom-qa
-cd /tmp/phantom-qa
-bash setup.sh
-```
-
-When the wizard asks which platforms to install for, select **Claude Code**. It will ask for your workspace path -- type the full path to your project folder (for example: `/home/yourname/my-project`).
-
-This copies the skills into your project's `.agent/skills/` directory and creates a `CLAUDE.md` rules file in your project root.
-
-**Step 2: Start Claude Code in your project**
-
-Open a terminal in your project folder and launch Claude Code:
+Open a terminal in any project folder and launch Claude Code:
 
 ```bash
 cd /path/to/your/project
 claude
 ```
 
-Claude Code automatically reads `CLAUDE.md` from your project root. The verification loop rules are now active.
+Claude Code automatically reads skills from `~/.claude/skills/` and rules from `~/.claude/CLAUDE.md`. The verification loop is active in every project, no per-project setup needed.
 
 **Step 3: Tell Claude to run PhantomQA**
 
@@ -297,7 +284,7 @@ In the Claude Code prompt, paste:
 
 > Run a full QA pass on this project. Find every issue -- placeholder content, broken buttons, console errors, missing validation, dead links, everything. Fix each issue, verify each fix works by re-running the test, and keep going until the test harness comes back clean. Show me terminal output at every step.
 
-Claude will follow the same find-fix-verify loop. It reads the rules from `CLAUDE.md` and uses the skills from `.agent/skills/`.
+Claude will follow the same find-fix-verify loop as Antigravity. It reads the rules from `~/.claude/CLAUDE.md` and uses the skills from `~/.claude/skills/`.
 
 ---
 
@@ -365,10 +352,13 @@ curl -sSL https://raw.githubusercontent.com/KyleBuildsAI/phantom-qa/main/setup.s
 The `install.sh` script supports direct flags for automation:
 
 ```bash
-./install.sh                               # Antigravity global + prompt for workspace
-./install.sh --global                      # Antigravity global only
-./install.sh --openclaw                    # OpenClaw global only
-./install.sh --workspace /path/to/project  # Workspace install only
+./install.sh                    # Antigravity (default)
+./install.sh --antigravity      # Antigravity only
+./install.sh --openclaw         # OpenClaw only
+./install.sh --claude           # Claude Code only
+./install.sh --cursor           # Cursor only
+./install.sh --windsurf         # Windsurf only
+./install.sh --all              # All detected platforms
 ```
 
 </details>
@@ -404,40 +394,36 @@ cp .openclaw/skills/phantom-qa/scripts/test-harness.js ~/.openclaw/workspace/ski
 cp .openclaw/skills/phantom-qa-tester/skill.md ~/.openclaw/workspace/skills/phantom-qa-tester/skill.md
 ```
 
-**For Claude Code (per-project):**
+**For Claude Code (global -- works in every project):**
 
 ```bash
-# Run this inside your project folder
-mkdir -p .agent/skills/continuous-qa/scripts
-mkdir -p .agent/skills/software-tester
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
-cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
-cp /path/to/phantom-qa/GEMINI.md CLAUDE.md
+mkdir -p ~/.claude/skills/continuous-qa/scripts
+mkdir -p ~/.claude/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.claude/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.claude/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.claude/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/GEMINI.md ~/.claude/CLAUDE.md
 ```
 
-**For Cursor (per-project):**
+**For Cursor (global -- works in every project):**
 
 ```bash
-# Same as Claude Code, but the rules file is named .cursorrules
-mkdir -p .agent/skills/continuous-qa/scripts
-mkdir -p .agent/skills/software-tester
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
-cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
-cp /path/to/phantom-qa/GEMINI.md .cursorrules
+mkdir -p ~/.cursor/skills/continuous-qa/scripts
+mkdir -p ~/.cursor/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.cursor/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.cursor/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.cursor/skills/software-tester/SKILL.md
 ```
 
-**For Windsurf (per-project):**
+**For Windsurf (global -- works in every project):**
 
 ```bash
-# Same as Claude Code, but the rules file is named .windsurfrules
-mkdir -p .agent/skills/continuous-qa/scripts
-mkdir -p .agent/skills/software-tester
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
-cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
-cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
-cp /path/to/phantom-qa/GEMINI.md .windsurfrules
+mkdir -p ~/.codeium/windsurf/skills/continuous-qa/scripts
+mkdir -p ~/.codeium/windsurf/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.codeium/windsurf/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.codeium/windsurf/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.codeium/windsurf/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/GEMINI.md ~/.codeium/windsurf/memories/global_rules.md
 ```
 
 </details>
@@ -514,9 +500,15 @@ bash setup.sh
 
 ### The agent isn't using PhantomQA's skills
 
-- **Antigravity:** Check that the files exist at `~/.gemini/antigravity/skills/continuous-qa/SKILL.md`. If not, run the setup wizard again.
-- **Claude Code:** Check that `CLAUDE.md` and `.agent/skills/` exist in your project root. PhantomQA must be installed per-project for Claude Code.
-- **OpenClaw:** Check that `~/.openclaw/workspace/skills/phantom-qa/skill.md` exists.
+All platforms install globally -- check that the skill files exist:
+
+- **Antigravity:** `~/.gemini/antigravity/skills/continuous-qa/SKILL.md`
+- **Claude Code:** `~/.claude/skills/continuous-qa/SKILL.md`
+- **OpenClaw:** `~/.openclaw/workspace/skills/phantom-qa/skill.md`
+- **Cursor:** `~/.cursor/skills/continuous-qa/SKILL.md`
+- **Windsurf:** `~/.codeium/windsurf/skills/continuous-qa/SKILL.md`
+
+If the file doesn't exist for your platform, run the setup wizard again and make sure that platform is selected.
 
 ### The test harness says "node: command not found"
 
