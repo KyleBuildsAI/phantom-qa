@@ -166,11 +166,11 @@ show_menu() {
     $SEL_CURSOR      && mark_u="${GREEN}[x]${RESET}"
     $SEL_WINDSURF    && mark_w="${GREEN}[x]${RESET}"
 
-    echo -e "    ${mark_a} 1. Google Antigravity  ${DIM}(global: ~/.gemini/antigravity/skills/)${RESET}"
-    echo -e "    ${mark_o} 2. OpenClaw            ${DIM}(global: ~/.openclaw/workspace/skills/)${RESET}"
-    echo -e "    ${mark_c} 3. Claude Code         ${DIM}(project-level install)${RESET}"
-    echo -e "    ${mark_u} 4. Cursor              ${DIM}(project-level install)${RESET}"
-    echo -e "    ${mark_w} 5. Windsurf            ${DIM}(project-level install)${RESET}"
+    echo -e "    ${mark_a} 1. Google Antigravity  ${DIM}(global: ~/.gemini/antigravity/skills/)${RESET}\033[K"
+    echo -e "    ${mark_o} 2. OpenClaw            ${DIM}(global: ~/.openclaw/workspace/skills/)${RESET}\033[K"
+    echo -e "    ${mark_c} 3. Claude Code         ${DIM}(project-level install)${RESET}\033[K"
+    echo -e "    ${mark_u} 4. Cursor              ${DIM}(project-level install)${RESET}\033[K"
+    echo -e "    ${mark_w} 5. Windsurf            ${DIM}(project-level install)${RESET}\033[K"
     echo ""
 
     read -p "    Toggle [1-5], Enter to continue, q to quit: " choice
@@ -186,8 +186,8 @@ show_menu() {
       *) ;;
     esac
 
-    # Move cursor up to redraw menu
-    printf '\033[8A'
+    # Move cursor up to redraw menu (5 options + 1 blank + 1 prompt = 7 lines)
+    printf '\033[7A'
   done
 
   # If any project-level platform selected, ask for workspace path
@@ -280,17 +280,25 @@ do_install_project() {
 
   echo -e "    ${BOLD}Installing to ${platform_name}...${RESET} ${DIM}(${ws})${RESET}"
 
-  mkdir -p "$ws/.agent/skills/continuous-qa/scripts"
-  mkdir -p "$ws/.agent/skills/software-tester/scripts"
+  # Resolve paths to check if workspace is the source repo itself
+  local ws_abs
+  ws_abs="$(cd "$ws" 2>/dev/null && pwd)" || ws_abs=""
 
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$ws/.agent/skills/continuous-qa/SKILL.md"
-  print_item "Copying continuous-qa skill...        ${CHECK}"
+  if [ -n "$ws_abs" ] && [ "$ws_abs" = "$SCRIPT_DIR" ]; then
+    print_ok "Skills already in place ${DIM}(running from source repo)${RESET}"
+  else
+    mkdir -p "$ws/.agent/skills/continuous-qa/scripts"
+    mkdir -p "$ws/.agent/skills/software-tester/scripts"
 
-  cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$ws/.agent/skills/continuous-qa/scripts/test-harness.js"
-  print_item "Copying test harness...               ${CHECK}"
+    cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$ws/.agent/skills/continuous-qa/SKILL.md"
+    print_item "Copying continuous-qa skill...        ${CHECK}"
 
-  cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$ws/.agent/skills/software-tester/SKILL.md"
-  print_item "Copying software-tester skill...      ${CHECK}"
+    cp "$SCRIPT_DIR/.agent/skills/continuous-qa/scripts/test-harness.js" "$ws/.agent/skills/continuous-qa/scripts/test-harness.js"
+    print_item "Copying test harness...               ${CHECK}"
+
+    cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$ws/.agent/skills/software-tester/SKILL.md"
+    print_item "Copying software-tester skill...      ${CHECK}"
+  fi
 
   # Copy rules with platform-specific filename
   if [ -f "$ws/$rules_name" ]; then
