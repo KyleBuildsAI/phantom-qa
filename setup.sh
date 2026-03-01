@@ -226,10 +226,10 @@ do_install_antigravity() {
     if [ -t 0 ]; then
       echo ""
       echo -e "      ${YELLOW}!${RESET} GEMINI.md already exists at ${DIM}$rules_file${RESET}"
-      echo "        1) Append  2) Replace  3) Skip"
+      echo "        1) Append (Recommended)  2) Replace  3) Skip"
       read -p "        Choice [1/2/3]: " rc
       case $rc in
-        1) echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; print_last "Rules appended                        ${CHECK}" ;;
+        1|"") echo "" >> "$rules_file"; cat "$SCRIPT_DIR/GEMINI.md" >> "$rules_file"; print_last "Rules appended                        ${CHECK}" ;;
         2) cp "$SCRIPT_DIR/GEMINI.md" "$rules_file"; print_last "Rules replaced                        ${CHECK}" ;;
         *) print_last "Rules skipped                         ${DASH}" ;;
       esac
@@ -297,10 +297,10 @@ do_install_project() {
     if [ -t 0 ]; then
       echo ""
       echo -e "      ${YELLOW}!${RESET} ${rules_name} already exists"
-      echo "        1) Append  2) Replace  3) Skip"
+      echo "        1) Append (Recommended)  2) Replace  3) Skip"
       read -p "        Choice [1/2/3]: " rc
       case $rc in
-        1) echo "" >> "$ws/$rules_name"; cat "$SCRIPT_DIR/GEMINI.md" >> "$ws/$rules_name"; print_last "Rules appended                        ${CHECK}" ;;
+        1|"") echo "" >> "$ws/$rules_name"; cat "$SCRIPT_DIR/GEMINI.md" >> "$ws/$rules_name"; print_last "Rules appended                        ${CHECK}" ;;
         2) cp "$SCRIPT_DIR/GEMINI.md" "$ws/$rules_name"; print_last "Rules replaced                        ${CHECK}" ;;
         *) print_last "Rules skipped                         ${DASH}" ;;
       esac

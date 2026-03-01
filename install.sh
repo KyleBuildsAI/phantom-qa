@@ -58,12 +58,12 @@ install_global() {
     echo ""
     echo "  Global GEMINI.md already exists at $GLOBAL_RULES_FILE"
     echo "  Would you like to:"
-    echo "    1) Append PhantomQA rules"
+    echo "    1) Append PhantomQA rules (Recommended)"
     echo "    2) Replace with PhantomQA rules"
     echo "    3) Skip (don't modify global rules)"
     read -p "  Choice [1/2/3]: " choice
     case $choice in
-      1) echo "" >> "$GLOBAL_RULES_FILE"; cat "$SCRIPT_DIR/GEMINI.md" >> "$GLOBAL_RULES_FILE"; echo "  [OK] Rules appended" ;;
+      1|"") echo "" >> "$GLOBAL_RULES_FILE"; cat "$SCRIPT_DIR/GEMINI.md" >> "$GLOBAL_RULES_FILE"; echo "  [OK] Rules appended" ;;
       2) cp "$SCRIPT_DIR/GEMINI.md" "$GLOBAL_RULES_FILE"; echo "  [OK] Rules replaced" ;;
       3) echo "  [SKIP] Global rules unchanged" ;;
     esac
