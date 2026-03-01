@@ -116,30 +116,62 @@ The rules enforce the same behavior regardless of which model is active.
 
 ## Install
 
-### One-Command Setup (recommended)
+### Quick Setup (recommended -- no experience needed)
+
+**Step 1: Open a terminal**
+
+Not sure how? Here's how on each operating system:
+
+| OS | How to open a terminal |
+|----|----------------------|
+| **Windows** | Press `Win + R`, type `cmd`, press Enter. Or search "Terminal" in the Start menu. |
+| **Mac** | Press `Cmd + Space`, type `Terminal`, press Enter. |
+| **Linux** | Press `Ctrl + Alt + T`. |
+
+**Step 2: Download PhantomQA**
+
+Copy and paste this entire line into your terminal and press Enter:
+
+```bash
+git clone https://github.com/KyleBuildsAI/phantom-qa.git
+```
+
+This downloads PhantomQA to a folder called `phantom-qa` inside whatever directory your terminal is currently in (usually your home folder).
+
+**Step 3: Go into the folder and run the setup wizard**
+
+Copy and paste these lines one at a time:
+
+```bash
+cd phantom-qa
+```
+```bash
+bash setup.sh
+```
+
+That's it. The setup wizard will walk you through the rest:
+1. It detects which AI platforms you have installed (Antigravity, OpenClaw, Claude Code, Cursor, Windsurf)
+2. It lets you choose where to install
+3. It copies everything to the right places automatically
+4. It shows you what to do next when it's done
+
+> **Don't have git installed?** You can also download PhantomQA as a ZIP file. Click the green **Code** button at the top of this page, then **Download ZIP**. Unzip it, open a terminal inside the folder, and run `bash setup.sh`.
+
+---
+
+### Alternative: One-Line Install
+
+If you're comfortable with the terminal, this single command downloads and runs the setup wizard automatically:
 
 ```bash
 curl -sSL https://raw.githubusercontent.com/KyleBuildsAI/phantom-qa/main/setup.sh | bash
 ```
 
-Or clone first:
+---
 
-```bash
-git clone https://github.com/KyleBuildsAI/phantom-qa.git
-cd phantom-qa
-chmod +x setup.sh
-./setup.sh
-```
+### Advanced Install (for scripting and CI/CD)
 
-The setup wizard will:
-1. Detect which AI platforms you have installed (Antigravity, OpenClaw, Claude Code, Cursor, Windsurf)
-2. Let you choose where to install
-3. Copy skills and rules to the right locations
-4. Show a completion summary with next steps
-
-### Advanced Install (install.sh)
-
-For scripting or CI/CD, use the direct installer:
+The `install.sh` script supports direct flags for automation:
 
 ```bash
 ./install.sh                               # Antigravity global + prompt for workspace
@@ -148,9 +180,12 @@ For scripting or CI/CD, use the direct installer:
 ./install.sh --workspace /path/to/project  # Workspace install only
 ```
 
-### Manual Install
+---
 
-Copy the files directly to your project:
+<details>
+<summary><strong>Manual Install (copy files yourself)</strong></summary>
+
+If you prefer to copy files manually instead of using the setup wizard:
 
 ```bash
 # For Antigravity
@@ -173,6 +208,8 @@ cp GEMINI.md /path/to/your/project/.cursorrules
 cp -r .agent/ /path/to/your/project/.agent/
 cp GEMINI.md /path/to/your/project/.windsurfrules
 ```
+
+</details>
 
 ## Usage
 
