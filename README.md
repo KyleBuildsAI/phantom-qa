@@ -66,9 +66,9 @@ The setup wizard handles the differences between platforms automatically. You ju
 
 Tested with these models (Feb 2026):
 
-- **Claude Opus 4.6** -- Best overall. Handles long, complex testing sessions.
-- **Gemini 3.1 Pro** -- Excellent. Works great with Antigravity's built-in browser testing.
+- **Claude Opus 4.6** -- Best overall. Handles long, complex testing sessions without stopping early.
 - **Claude Sonnet 4.6** -- Good for faster runs on simpler projects.
+- **Gemini 3.1 Pro** -- Excellent. Works great with Antigravity's built-in browser testing.
 
 PhantomQA works the same way regardless of which model you're using.
 
@@ -119,7 +119,230 @@ That's it. The setup wizard will walk you through the rest:
 
 ---
 
-### Alternative: One-Line Install
+### Verify It's Installed
+
+After running the setup wizard, here's how to confirm PhantomQA is actually installed for each platform.
+
+**Google Antigravity:**
+
+Open a terminal and run:
+
+```bash
+ls ~/.gemini/antigravity/skills/continuous-qa/SKILL.md
+```
+
+If it prints the file path back to you, it's installed. If it says "No such file or directory," the install didn't work -- run `bash setup.sh` again and make sure you select Antigravity.
+
+You can also check the rules file:
+
+```bash
+cat ~/.gemini/antigravity/GEMINI.md
+```
+
+You should see text that starts with "# Project Rules" and mentions "Continuous Verification Loop."
+
+**Claude Code:**
+
+Go to the project folder where you installed PhantomQA and run:
+
+```bash
+ls .agent/skills/continuous-qa/SKILL.md
+```
+
+Also check the rules file:
+
+```bash
+cat CLAUDE.md
+```
+
+You should see the same "Continuous Verification Loop" rules.
+
+**OpenClaw:**
+
+```bash
+ls ~/.openclaw/workspace/skills/phantom-qa/skill.md
+```
+
+If it prints the path, you're good.
+
+**Cursor / Windsurf:**
+
+Go to the project folder and check:
+
+```bash
+ls .agent/skills/continuous-qa/SKILL.md
+```
+
+And check for the rules file (`.cursorrules` for Cursor, `.windsurfrules` for Windsurf):
+
+```bash
+ls .cursorrules    # Cursor
+ls .windsurfrules  # Windsurf
+```
+
+---
+
+## How to Use It With Google Antigravity
+
+This is a step-by-step walkthrough. Follow it exactly.
+
+**Step 1: Make sure PhantomQA is installed for Antigravity**
+
+If you haven't already, open a terminal and run:
+
+```bash
+cd phantom-qa
+bash setup.sh
+```
+
+When the wizard asks which platforms to install for, make sure **Google Antigravity** is selected (it should be auto-detected if you have Antigravity installed). Press Enter to continue, then let it finish.
+
+**Step 2: Open your project in Antigravity**
+
+1. Open Google Antigravity
+2. Click **File > Open Folder** (or drag your project folder into the window)
+3. Navigate to the project you want to test and open it
+
+**Step 3: Tell the agent to run PhantomQA**
+
+In the Agent Manager chat panel, paste this prompt:
+
+> Run a full QA pass on this project. Find every issue -- placeholder content, broken buttons, console errors, missing validation, dead links, everything. Fix each issue, verify each fix works by re-running the test, and keep going until the test harness comes back clean. Show me terminal output at every step.
+
+Press Enter. The agent will:
+- Automatically load the `continuous-qa` skill (it matches your request)
+- Run the test harness to scan your entire project
+- Start fixing issues one by one
+- Re-run the test after each fix to prove it worked
+- Keep going until everything is clean
+
+**Step 4: Sit back and watch**
+
+You'll see status checkpoints every 5 fixes:
+
+```
+=== STATUS CHECKPOINT ===
+Fixes applied: 12
+Fixes verified: 12
+Remaining issues: 8
+Regressions found: 0
+Application still runs: yes
+Next action: Fixing W-005 (dead link in footer)
+=========================
+```
+
+You don't need to do anything. Just let it run.
+
+**Step 5: If the agent stops early**
+
+Sometimes the agent stops before it's truly done. Paste this:
+
+> You stopped without running the verification loop. Run the test harness again and show me the output. If there are remaining issues, continue fixing them.
+
+**How Antigravity finds PhantomQA's skills:**
+
+When you installed PhantomQA for Antigravity, the setup wizard copied two skills into `~/.gemini/antigravity/skills/`:
+- `continuous-qa` -- the core find-fix-verify loop
+- `software-tester` -- interactive UI testing (clicking buttons, filling forms)
+
+It also installed a rules file at `~/.gemini/antigravity/GEMINI.md` that forces the agent to follow the verification loop no matter what.
+
+Antigravity automatically reads skills from `~/.gemini/antigravity/skills/` and loads them when your request matches their description. You don't need to manually activate anything -- just describe what you want and the right skill loads automatically.
+
+---
+
+## How to Use It With Claude Code
+
+**Step 1: Install PhantomQA into your project**
+
+Open a terminal, navigate to your project folder, and run the setup wizard:
+
+```bash
+cd /path/to/your/project
+```
+
+Then clone PhantomQA (if you haven't already) and run setup:
+
+```bash
+git clone https://github.com/KyleBuildsAI/phantom-qa.git /tmp/phantom-qa
+cd /tmp/phantom-qa
+bash setup.sh
+```
+
+When the wizard asks which platforms to install for, select **Claude Code**. It will ask for your workspace path -- type the full path to your project folder (for example: `/home/yourname/my-project`).
+
+This copies the skills into your project's `.agent/skills/` directory and creates a `CLAUDE.md` rules file in your project root.
+
+**Step 2: Start Claude Code in your project**
+
+Open a terminal in your project folder and launch Claude Code:
+
+```bash
+cd /path/to/your/project
+claude
+```
+
+Claude Code automatically reads `CLAUDE.md` from your project root. The verification loop rules are now active.
+
+**Step 3: Tell Claude to run PhantomQA**
+
+In the Claude Code prompt, paste:
+
+> Run a full QA pass on this project. Find every issue -- placeholder content, broken buttons, console errors, missing validation, dead links, everything. Fix each issue, verify each fix works by re-running the test, and keep going until the test harness comes back clean. Show me terminal output at every step.
+
+Claude will follow the same find-fix-verify loop. It reads the rules from `CLAUDE.md` and uses the skills from `.agent/skills/`.
+
+---
+
+## How to Use It With OpenClaw
+
+**Step 1: Install PhantomQA for OpenClaw**
+
+```bash
+cd phantom-qa
+bash setup.sh
+```
+
+Select **OpenClaw** when the wizard asks. It copies two native skills into `~/.openclaw/workspace/skills/`:
+- `phantom-qa` -- the core QA loop
+- `phantom-qa-tester` -- interactive app testing
+
+**Step 2: Use the skills in OpenClaw**
+
+The skills are available globally to all OpenClaw agents. Any agent can invoke them by matching against the skill description. To trigger a QA pass, tell your agent:
+
+> Run a full QA pass on this project. Find every issue, fix each one, verify each fix works, and keep going until the test harness comes back clean.
+
+**Step 3: Run the test harness directly (optional)**
+
+You can also run the scanner standalone from any project folder:
+
+```bash
+node ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js --project-root /path/to/project
+```
+
+<details>
+<summary><strong>JSON integration for advanced users</strong></summary>
+
+The test harness outputs structured JSON that OpenClaw agents can consume programmatically:
+
+```json
+{
+    "name": "phantom_qa_scan",
+    "description": "Run autonomous QA scan on a codebase",
+    "command": "node ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js",
+    "output_format": "json",
+    "output_file": ".phantom-qa-report.json"
+}
+```
+
+</details>
+
+---
+
+## Alternative Install Methods
+
+### One-Line Install
 
 If you're comfortable with the terminal, this single command downloads and runs the setup wizard automatically:
 
@@ -148,33 +371,73 @@ The `install.sh` script supports direct flags for automation:
 
 If you prefer to copy files manually instead of using the setup wizard:
 
+**For Antigravity (global -- works in every project):**
+
 ```bash
-# For Antigravity
-cp -r .agent/ /path/to/your/project/.agent/
-cp GEMINI.md /path/to/your/project/GEMINI.md
+# Create the skill directories
+mkdir -p ~/.gemini/antigravity/skills/continuous-qa/scripts
+mkdir -p ~/.gemini/antigravity/skills/software-tester
 
-# For OpenClaw
-cp -r .openclaw/skills/phantom-qa/ ~/.openclaw/workspace/skills/phantom-qa/
-cp -r .openclaw/skills/phantom-qa-tester/ ~/.openclaw/workspace/skills/phantom-qa-tester/
+# Copy the skills
+cp .agent/skills/continuous-qa/SKILL.md ~/.gemini/antigravity/skills/continuous-qa/SKILL.md
+cp .agent/skills/continuous-qa/scripts/test-harness.js ~/.gemini/antigravity/skills/continuous-qa/scripts/test-harness.js
+cp .agent/skills/software-tester/SKILL.md ~/.gemini/antigravity/skills/software-tester/SKILL.md
 
-# For Claude Code
-cp -r .agent/ /path/to/your/project/.agent/
-cp GEMINI.md /path/to/your/project/CLAUDE.md
+# Copy the rules
+cp GEMINI.md ~/.gemini/antigravity/GEMINI.md
+```
 
-# For Cursor
-cp -r .agent/ /path/to/your/project/.agent/
-cp GEMINI.md /path/to/your/project/.cursorrules
+**For OpenClaw (global -- works in every agent):**
 
-# For Windsurf
-cp -r .agent/ /path/to/your/project/.agent/
-cp GEMINI.md /path/to/your/project/.windsurfrules
+```bash
+mkdir -p ~/.openclaw/workspace/skills/phantom-qa/scripts
+mkdir -p ~/.openclaw/workspace/skills/phantom-qa-tester
+cp .openclaw/skills/phantom-qa/skill.md ~/.openclaw/workspace/skills/phantom-qa/skill.md
+cp .openclaw/skills/phantom-qa/scripts/test-harness.js ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js
+cp .openclaw/skills/phantom-qa-tester/skill.md ~/.openclaw/workspace/skills/phantom-qa-tester/skill.md
+```
+
+**For Claude Code (per-project):**
+
+```bash
+# Run this inside your project folder
+mkdir -p .agent/skills/continuous-qa/scripts
+mkdir -p .agent/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/GEMINI.md CLAUDE.md
+```
+
+**For Cursor (per-project):**
+
+```bash
+# Same as Claude Code, but the rules file is named .cursorrules
+mkdir -p .agent/skills/continuous-qa/scripts
+mkdir -p .agent/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/GEMINI.md .cursorrules
+```
+
+**For Windsurf (per-project):**
+
+```bash
+# Same as Claude Code, but the rules file is named .windsurfrules
+mkdir -p .agent/skills/continuous-qa/scripts
+mkdir -p .agent/skills/software-tester
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md .agent/skills/continuous-qa/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js .agent/skills/continuous-qa/scripts/test-harness.js
+cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md .agent/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/GEMINI.md .windsurfrules
 ```
 
 </details>
 
 ---
 
-## How to Use It
+## More Prompts You Can Use
 
 After installing, open your project in your AI coding agent and tell it what to do. Here are ready-to-use prompts you can copy and paste directly into the chat.
 
@@ -204,58 +467,45 @@ Sometimes the agent will stop before it's actually finished. Paste this:
 
 > Start the application and test every screen. Click every button, submit every form with both valid and invalid data, navigate every link. Fix everything that fails. Take screenshots as proof.
 
-See `QUICKREF.md` for more prompts.
+See `QUICKREF.md` for even more prompts.
 
 ---
 
-## What You'll See While It's Working
+## Troubleshooting
 
-The agent will show you progress checkpoints every 5 fixes, so you know it's still working and how much is left:
+### "Command not found" when running bash setup.sh
 
-```
-=== STATUS CHECKPOINT ===
-Fixes applied: 12
-Fixes verified: 12
-Remaining issues: 8
-Regressions found: 0
-Application still runs: yes
-Next action: Fixing W-005 (dead link in footer)
-=========================
-```
-
-You don't need to do anything when you see these. They're just status updates so you can follow along.
-
----
-
-## OpenClaw Integration
-
-If you use OpenClaw, PhantomQA includes two native skills that install automatically:
-
-- **phantom-qa** -- The core testing and fixing loop
-- **phantom-qa-tester** -- Interactive app testing (clicks through your UI)
-
-The setup wizard handles OpenClaw installation. You can also install manually:
+Make sure you're inside the `phantom-qa` folder first:
 
 ```bash
-./install.sh --openclaw
+cd phantom-qa
+bash setup.sh
 ```
 
-<details>
-<summary><strong>JSON integration for advanced users</strong></summary>
+If you downloaded the ZIP file, the folder might be named `phantom-qa-main` instead:
 
-The test harness outputs structured JSON that OpenClaw agents can consume programmatically:
-
-```json
-{
-    "name": "phantom_qa_scan",
-    "description": "Run autonomous QA scan on a codebase",
-    "command": "node ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js",
-    "output_format": "json",
-    "output_file": ".phantom-qa-report.json"
-}
+```bash
+cd phantom-qa-main
+bash setup.sh
 ```
 
-</details>
+### The agent isn't using PhantomQA's skills
+
+- **Antigravity:** Check that the files exist at `~/.gemini/antigravity/skills/continuous-qa/SKILL.md`. If not, run the setup wizard again.
+- **Claude Code:** Check that `CLAUDE.md` and `.agent/skills/` exist in your project root. PhantomQA must be installed per-project for Claude Code.
+- **OpenClaw:** Check that `~/.openclaw/workspace/skills/phantom-qa/skill.md` exists.
+
+### The test harness says "node: command not found"
+
+The test harness requires Node.js. Install it from [nodejs.org](https://nodejs.org/) (download the LTS version). The skills themselves still work without Node.js -- the agent just won't be able to run the automated scanner. It will still follow the verification loop using other methods.
+
+### The agent keeps stopping after a few fixes
+
+Paste this into the chat:
+
+> You stopped without running the verification loop. Run the test harness again and show me the output. If there are remaining issues, continue fixing them. Don't stop until the report is clean.
+
+This is normal. Some models need a nudge to keep going through long sessions. Claude Opus 4.6 handles this best.
 
 ---
 
@@ -343,7 +593,7 @@ phantom-qa/
   LICENSE                            # MIT license
   setup.sh                           # Interactive setup wizard (recommended)
   install.sh                         # Quick/advanced installer
-  .agent/                            # Antigravity skills
+  .agent/                            # Antigravity / Claude Code / Cursor / Windsurf skills
     skills/
       continuous-qa/
         SKILL.md                     # Core QA loop methodology (7 phases)
