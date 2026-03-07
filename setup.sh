@@ -201,6 +201,7 @@ do_install_antigravity() {
 
   mkdir -p "$skills_dir/continuous-qa/scripts"
   mkdir -p "$skills_dir/software-tester/scripts"
+  mkdir -p "$skills_dir/phantom-depth/scripts"
 
   cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
   print_item "Copying continuous-qa skill...        ${CHECK}"
@@ -210,6 +211,9 @@ do_install_antigravity() {
 
   cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
   print_item "Copying software-tester skill...      ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/phantom-depth/SKILL.md" "$skills_dir/phantom-depth/SKILL.md"
+  print_item "Copying phantom-depth skill...        ${CHECK}"
 
   # Install rules
   local rules_file="$rules_dir/GEMINI.md"
@@ -252,6 +256,7 @@ do_install_openclaw() {
 
   mkdir -p "$skills_dir/phantom-qa/scripts"
   mkdir -p "$skills_dir/phantom-qa-tester"
+  mkdir -p "$skills_dir/phantom-depth/scripts"
 
   cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa/skill.md" "$skills_dir/phantom-qa/skill.md"
   print_item "Copying phantom-qa skill...           ${CHECK}"
@@ -260,7 +265,10 @@ do_install_openclaw() {
   print_item "Copying test harness...               ${CHECK}"
 
   cp "$SCRIPT_DIR/.openclaw/skills/phantom-qa-tester/skill.md" "$skills_dir/phantom-qa-tester/skill.md"
-  print_last "Copying phantom-qa-tester skill...    ${CHECK}"
+  print_item "Copying phantom-qa-tester skill...    ${CHECK}"
+
+  cp "$SCRIPT_DIR/.openclaw/skills/phantom-depth/skill.md" "$skills_dir/phantom-depth/skill.md"
+  print_last "Copying phantom-depth skill...        ${CHECK}"
 
   INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
   echo ""
@@ -273,6 +281,7 @@ do_install_claude() {
 
   mkdir -p "$skills_dir/continuous-qa/scripts"
   mkdir -p "$skills_dir/software-tester/scripts"
+  mkdir -p "$skills_dir/phantom-depth/scripts"
 
   cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
   print_item "Copying continuous-qa skill...        ${CHECK}"
@@ -282,6 +291,9 @@ do_install_claude() {
 
   cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
   print_item "Copying software-tester skill...      ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/phantom-depth/SKILL.md" "$skills_dir/phantom-depth/SKILL.md"
+  print_item "Copying phantom-depth skill...        ${CHECK}"
 
   # Install rules
   local rules_file="$HOME/.claude/CLAUDE.md"
@@ -317,6 +329,7 @@ do_install_cursor() {
 
   mkdir -p "$skills_dir/continuous-qa/scripts"
   mkdir -p "$skills_dir/software-tester/scripts"
+  mkdir -p "$skills_dir/phantom-depth/scripts"
 
   cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
   print_item "Copying continuous-qa skill...        ${CHECK}"
@@ -325,7 +338,10 @@ do_install_cursor() {
   print_item "Copying test harness...               ${CHECK}"
 
   cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
-  print_last "Copying software-tester skill...      ${CHECK}"
+  print_item "Copying software-tester skill...      ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/phantom-depth/SKILL.md" "$skills_dir/phantom-depth/SKILL.md"
+  print_last "Copying phantom-depth skill...        ${CHECK}"
 
   INSTALLED_COUNT=$((INSTALLED_COUNT + 1))
   echo ""
@@ -338,6 +354,7 @@ do_install_windsurf() {
 
   mkdir -p "$skills_dir/continuous-qa/scripts"
   mkdir -p "$skills_dir/software-tester/scripts"
+  mkdir -p "$skills_dir/phantom-depth/scripts"
 
   cp "$SCRIPT_DIR/.agent/skills/continuous-qa/SKILL.md" "$skills_dir/continuous-qa/SKILL.md"
   print_item "Copying continuous-qa skill...        ${CHECK}"
@@ -347,6 +364,9 @@ do_install_windsurf() {
 
   cp "$SCRIPT_DIR/.agent/skills/software-tester/SKILL.md" "$skills_dir/software-tester/SKILL.md"
   print_item "Copying software-tester skill...      ${CHECK}"
+
+  cp "$SCRIPT_DIR/.agent/skills/phantom-depth/SKILL.md" "$skills_dir/phantom-depth/SKILL.md"
+  print_item "Copying phantom-depth skill...        ${CHECK}"
 
   # Install rules to Windsurf's global rules file
   local rules_file="$HOME/.codeium/windsurf/memories/global_rules.md"
@@ -395,11 +415,11 @@ print_summary() {
   print_step 5 5 "Setup complete!"
 
   local stat_a stat_o stat_c stat_u stat_w
-  $SEL_ANTIGRAVITY && stat_a="${CHECK}  Antigravity    2 skills + rules" || stat_a="${DASH}  Antigravity    skipped"
-  $SEL_OPENCLAW    && stat_o="${CHECK}  OpenClaw       2 skills + harness" || stat_o="${DASH}  OpenClaw       skipped"
-  $SEL_CLAUDE      && stat_c="${CHECK}  Claude Code    2 skills + rules" || stat_c="${DASH}  Claude Code    skipped"
-  $SEL_CURSOR      && stat_u="${CHECK}  Cursor         2 skills" || stat_u="${DASH}  Cursor         skipped"
-  $SEL_WINDSURF    && stat_w="${CHECK}  Windsurf       2 skills + rules" || stat_w="${DASH}  Windsurf       skipped"
+  $SEL_ANTIGRAVITY && stat_a="${CHECK}  Antigravity    3 skills + rules" || stat_a="${DASH}  Antigravity    skipped"
+  $SEL_OPENCLAW    && stat_o="${CHECK}  OpenClaw       3 skills + harness" || stat_o="${DASH}  OpenClaw       skipped"
+  $SEL_CLAUDE      && stat_c="${CHECK}  Claude Code    3 skills + rules" || stat_c="${DASH}  Claude Code    skipped"
+  $SEL_CURSOR      && stat_u="${CHECK}  Cursor         3 skills" || stat_u="${DASH}  Cursor         skipped"
+  $SEL_WINDSURF    && stat_w="${CHECK}  Windsurf       3 skills + rules" || stat_w="${DASH}  Windsurf       skipped"
 
   echo -e "    ${CYAN}+===============================================+${RESET}"
   echo -e "    ${CYAN}|${RESET}           ${BOLD}Installation Summary${RESET}               ${CYAN}|${RESET}"
