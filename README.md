@@ -464,6 +464,56 @@ See `QUICKREF.md` for even more prompts.
 
 ---
 
+## Advanced Prompts: Autonomous Improvement Mode
+
+These prompts go beyond basic QA. They give the agent full control to continuously test every combination, discover improvements, and optimize your software without you having to intervene. Copy and paste them directly into your AI coding agent.
+
+### Exhaustive Combination Testing (Loop Every Variation)
+
+> Map out every feature, input, configuration option, and user flow in this project. Build a test matrix that covers every combination and variation -- valid inputs, invalid inputs, edge cases, boundary values, empty states, max-length inputs, special characters, concurrent operations, and every permutation of settings. Execute the full matrix in a loop. When a combination fails, fix it, re-run the full matrix to check for regressions, and keep looping until every single combination passes. Do not stop until the matrix is 100% green. Show me the matrix and results at every checkpoint.
+
+### Post-Redesign Feature Verification
+
+> This project just went through a UI redesign. Crawl the entire codebase and build a complete inventory of every feature, button, link, form, modal, dropdown, toggle, navigation path, keyboard shortcut, and interactive element that existed before the redesign. Cross-reference this inventory against the current UI. Identify anything that is missing, broken, unreachable, visually broken, or behaves differently than before. Fix every discrepancy. After each fix, re-run the full inventory check to make sure nothing else broke. Keep going until every feature from the original is confirmed working in the new design. Show me the full feature inventory and status of each item.
+
+### Autonomous Software Improvement (Full Control)
+
+> Take full autonomous control of this project. Your goal is to make this software as good as it can possibly be. Follow this loop continuously without stopping:
+>
+> 1. **Audit** -- Scan the entire codebase for bugs, performance bottlenecks, security vulnerabilities, accessibility issues, code smells, missing error handling, inconsistent patterns, dead code, and anything that could be improved.
+> 2. **Prioritize** -- Rank every issue by impact. Critical bugs first, then performance, then security, then code quality, then polish.
+> 3. **Fix** -- Fix the highest-priority issue. Make the change minimal and focused.
+> 4. **Verify** -- Prove the fix works. Run tests, build the project, start the application. Show terminal output.
+> 5. **Regression check** -- Re-run the full test suite to make sure nothing else broke.
+> 6. **Discover** -- After fixing, look for new opportunities. Can this function be faster? Can this API response be smaller? Can this error message be clearer? Can this component be more reusable?
+> 7. **Repeat** -- Go back to step 1 with the updated codebase.
+>
+> Output a status checkpoint every 5 improvements. Do not stop until you have exhausted every possible improvement. Do not ask for permission -- just fix, verify, and move on.
+
+### Performance Optimization Loop (Frame Rate / Speed)
+
+> Analyze the entire rendering pipeline, animation system, and frame-by-frame performance of this application. Profile every function that runs per frame or per render cycle. Identify every bottleneck -- unnecessary re-renders, expensive DOM operations, unoptimized loops, synchronous blocking calls, layout thrashing, excessive memory allocation, redundant calculations, and unthrottled event handlers. Fix each bottleneck one at a time. After each fix, measure the before and after performance (frame rate, render time, memory usage) and show me the numbers. Do not sacrifice visual quality, feature completeness, or correctness for speed. Keep optimizing in a loop until frame rate is maximized and render time is minimized. Show me a performance summary at every checkpoint with concrete metrics.
+
+### Feature Discovery and Enhancement Loop
+
+> Analyze this project from a user's perspective. Use the application as a real user would. For every screen, workflow, and interaction, ask: What is confusing? What takes too many clicks? What error state is unhandled? What edge case will crash this? What accessibility issue exists? What feature is obviously missing that users would expect? Build a list of every improvement opportunity, ranked by user impact. Then start implementing them one by one. After each improvement, verify it works, check for regressions, and re-analyze to find the next opportunity. Keep looping. Output a checkpoint every 5 improvements showing what was added, what was fixed, and what is next.
+
+### Stress Testing and Stability Loop
+
+> Push this application to its limits. Test with: maximum-length inputs in every field, thousands of rapid-fire API calls, simultaneous operations on the same data, network disconnection mid-operation, corrupted input data, missing environment variables, full disk simulation, expired tokens, concurrent user sessions, and browser back/forward during async operations. For each failure you find, fix the root cause (not just the symptom), verify the fix holds under the same stress condition, then move on to the next stress test. Keep looping until the application handles every abuse case gracefully without crashing, losing data, or showing raw errors to the user.
+
+### Complete Test Suite Generation
+
+> Analyze every function, endpoint, component, and user flow in this project. Generate a comprehensive test suite that covers: unit tests for every function with edge cases, integration tests for every API endpoint, component tests for every UI element, end-to-end tests for every user workflow, error path tests for every failure mode, and boundary tests for every input validation. Run the full suite. Fix any code that fails the tests (fix the code, not the tests -- the tests represent correct behavior). Re-run after each fix. Keep looping until the entire suite passes with 100% of tests green. Show me coverage metrics and test results at every checkpoint.
+
+### Security Hardening Loop
+
+> Perform a comprehensive security audit of this project. Check for: SQL injection, XSS vulnerabilities, CSRF weaknesses, insecure direct object references, broken authentication flows, sensitive data exposure, missing rate limiting, insecure deserialization, known vulnerable dependencies, hardcoded secrets, permissive CORS, missing input sanitization, insecure file uploads, path traversal risks, and every item on the OWASP Top 10. Fix each vulnerability. After each fix, re-test to confirm the vulnerability is closed and no new ones were introduced. Keep looping until every security check passes clean.
+
+See `QUICKREF.md` for even more prompts.
+
+---
+
 ## Troubleshooting
 
 ### Windows: "Failed to attach disk" or WSL error when running bash setup.sh
