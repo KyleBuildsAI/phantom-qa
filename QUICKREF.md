@@ -51,6 +51,71 @@ there are zero failures and zero critical warnings, we're done. If not,
 keep fixing.
 ```
 
+## Phantom Depth: Full GUI Control
+
+### Launch and Test Everything
+```
+Launch this application and take full control. Open every screen, click every
+button, fill every form, toggle every switch, test every dropdown, try every
+keyboard shortcut, and navigate every link. Take a screenshot before and after
+every interaction as proof. Build a complete feature inventory and mark each
+element as PASS or FAIL. Fix every failure, re-test to verify, and keep going
+until every single element passes.
+```
+
+### Exhaustive Combination Testing
+```
+Launch this application and run exhaustive combination testing. For every input
+field, test: empty, valid data, maximum length (10,000+ characters), special
+characters, Unicode/emoji, XSS payloads, SQL injection strings, and whitespace.
+For every button, test: single click, double click, rapid clicks, keyboard
+activation, and clicking while loading. For every dropdown, select every option.
+For every toggle, switch on/off/on and verify persistence. Build a test matrix
+and loop until 100% passes. Take a screenshot for every test. Do not stop.
+```
+
+### Post-Redesign Feature Verification
+```
+This application just went through a UI redesign. Launch it and build a complete
+inventory of every feature, button, link, form, modal, dropdown, toggle, nav
+path, and keyboard shortcut. Cross-reference against the codebase to find
+anything missing, broken, or visually wrong. Test at every viewport (320px,
+768px, 1920px, 3440px). Take screenshots at each breakpoint. Fix every gap.
+Keep going until every feature is confirmed working.
+```
+
+### Performance Optimization (Frame Rate)
+```
+Launch this application and profile its rendering performance. Measure frame
+rate, long tasks, layout shift, memory usage, and network transfer. Identify
+every bottleneck. Fix each one, then re-measure and show before/after numbers.
+Take screenshots to prove zero visual quality loss. If any optimization breaks
+quality or features, revert and try a different approach. Keep optimizing until
+frame rate is maximized.
+```
+
+### Full Autonomous Improvement
+```
+Take full autonomous control of this application. Launch it, interact with it,
+and continuously improve it. Loop: (1) Find something wrong, slow, or missing.
+(2) Fix it. (3) Re-launch and verify with a screenshot. (4) Check nothing else
+broke. (5) Commit. (6) Find the next thing. Fix crashes first, then bugs, then
+performance, then UX, then accessibility, then polish. Do not ask for permission.
+Do not stop.
+```
+
+### Stress Test the UI
+```
+Launch this application and try to break it. Click during loading. Submit forms
+with 10,000-character inputs. Toggle rapidly. Navigate back/forward during async
+ops. Open modals twice. Refresh mid-submission. Scroll during renders. Resize
+during animations. For every crash or error, fix the root cause, verify the fix,
+take before/after screenshots, and move on. Keep going until the app handles
+every abuse case gracefully.
+```
+
+---
+
 ## Advanced: Autonomous Improvement Mode
 
 ### Exhaustive Combination Testing

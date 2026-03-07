@@ -249,9 +249,10 @@ Sometimes the agent stops before it's truly done. Paste this:
 
 **How Antigravity finds PhantomQA's skills:**
 
-When you installed PhantomQA for Antigravity, the setup wizard copied two skills into `~/.gemini/antigravity/skills/`:
+When you installed PhantomQA for Antigravity, the setup wizard copied three skills into `~/.gemini/antigravity/skills/`:
 - `continuous-qa` -- the core find-fix-verify loop
 - `software-tester` -- interactive UI testing (clicking buttons, filling forms)
+- `phantom-depth` -- advanced GUI automation with full mouse/keyboard control, screenshots, performance profiling, and autonomous improvement
 
 It also installed a rules file at `~/.gemini/antigravity/GEMINI.md` that forces the agent to follow the verification loop no matter what.
 
@@ -297,9 +298,10 @@ cd phantom-qa
 bash setup.sh
 ```
 
-Select **OpenClaw** when the wizard asks. It copies two native skills into `~/.openclaw/workspace/skills/`:
+Select **OpenClaw** when the wizard asks. It copies three native skills into `~/.openclaw/workspace/skills/`:
 - `phantom-qa` -- the core QA loop
 - `phantom-qa-tester` -- interactive app testing
+- `phantom-depth` -- advanced GUI automation with full mouse/keyboard control
 
 **Step 2: Use the skills in OpenClaw**
 
@@ -374,11 +376,13 @@ If you prefer to copy files manually instead of using the setup wizard:
 # Create the skill directories
 mkdir -p ~/.gemini/antigravity/skills/continuous-qa/scripts
 mkdir -p ~/.gemini/antigravity/skills/software-tester
+mkdir -p ~/.gemini/antigravity/skills/phantom-depth
 
 # Copy the skills
 cp .agent/skills/continuous-qa/SKILL.md ~/.gemini/antigravity/skills/continuous-qa/SKILL.md
 cp .agent/skills/continuous-qa/scripts/test-harness.js ~/.gemini/antigravity/skills/continuous-qa/scripts/test-harness.js
 cp .agent/skills/software-tester/SKILL.md ~/.gemini/antigravity/skills/software-tester/SKILL.md
+cp .agent/skills/phantom-depth/SKILL.md ~/.gemini/antigravity/skills/phantom-depth/SKILL.md
 
 # Copy the rules
 cp GEMINI.md ~/.gemini/antigravity/GEMINI.md
@@ -389,9 +393,11 @@ cp GEMINI.md ~/.gemini/antigravity/GEMINI.md
 ```bash
 mkdir -p ~/.openclaw/workspace/skills/phantom-qa/scripts
 mkdir -p ~/.openclaw/workspace/skills/phantom-qa-tester
+mkdir -p ~/.openclaw/workspace/skills/phantom-depth
 cp .openclaw/skills/phantom-qa/skill.md ~/.openclaw/workspace/skills/phantom-qa/skill.md
 cp .openclaw/skills/phantom-qa/scripts/test-harness.js ~/.openclaw/workspace/skills/phantom-qa/scripts/test-harness.js
 cp .openclaw/skills/phantom-qa-tester/skill.md ~/.openclaw/workspace/skills/phantom-qa-tester/skill.md
+cp .openclaw/skills/phantom-depth/skill.md ~/.openclaw/workspace/skills/phantom-depth/skill.md
 ```
 
 **For Claude Code (global -- works in every project):**
@@ -399,9 +405,11 @@ cp .openclaw/skills/phantom-qa-tester/skill.md ~/.openclaw/workspace/skills/phan
 ```bash
 mkdir -p ~/.claude/skills/continuous-qa/scripts
 mkdir -p ~/.claude/skills/software-tester
+mkdir -p ~/.claude/skills/phantom-depth
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.claude/skills/continuous-qa/SKILL.md
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.claude/skills/continuous-qa/scripts/test-harness.js
 cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.claude/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/phantom-depth/SKILL.md ~/.claude/skills/phantom-depth/SKILL.md
 cp /path/to/phantom-qa/GEMINI.md ~/.claude/CLAUDE.md
 ```
 
@@ -410,9 +418,11 @@ cp /path/to/phantom-qa/GEMINI.md ~/.claude/CLAUDE.md
 ```bash
 mkdir -p ~/.cursor/skills/continuous-qa/scripts
 mkdir -p ~/.cursor/skills/software-tester
+mkdir -p ~/.cursor/skills/phantom-depth
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.cursor/skills/continuous-qa/SKILL.md
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.cursor/skills/continuous-qa/scripts/test-harness.js
 cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.cursor/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/phantom-depth/SKILL.md ~/.cursor/skills/phantom-depth/SKILL.md
 ```
 
 **For Windsurf (global -- works in every project):**
@@ -420,9 +430,11 @@ cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.cursor/skills/s
 ```bash
 mkdir -p ~/.codeium/windsurf/skills/continuous-qa/scripts
 mkdir -p ~/.codeium/windsurf/skills/software-tester
+mkdir -p ~/.codeium/windsurf/skills/phantom-depth
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/SKILL.md ~/.codeium/windsurf/skills/continuous-qa/SKILL.md
 cp /path/to/phantom-qa/.agent/skills/continuous-qa/scripts/test-harness.js ~/.codeium/windsurf/skills/continuous-qa/scripts/test-harness.js
 cp /path/to/phantom-qa/.agent/skills/software-tester/SKILL.md ~/.codeium/windsurf/skills/software-tester/SKILL.md
+cp /path/to/phantom-qa/.agent/skills/phantom-depth/SKILL.md ~/.codeium/windsurf/skills/phantom-depth/SKILL.md
 cp /path/to/phantom-qa/GEMINI.md ~/.codeium/windsurf/memories/global_rules.md
 ```
 
@@ -459,6 +471,36 @@ Sometimes the agent will stop before it's actually finished. Paste this:
 ### Test the UI (Click Through Everything)
 
 > Start the application and test every screen. Click every button, submit every form with both valid and invalid data, navigate every link. Fix everything that fails. Take screenshots as proof.
+
+---
+
+## Phantom Depth Prompts: Full GUI Control
+
+These prompts activate the `phantom-depth` skill, which gives your AI agent full mouse and keyboard control over the running application. The agent launches the app, clicks through everything, takes screenshots, and works autonomously.
+
+### Launch and Test Everything (Full Visual Walkthrough)
+
+> Launch this application and take full control. Open every screen, click every button, fill every form, toggle every switch, test every dropdown, try every keyboard shortcut, and navigate every link. Take a screenshot before and after every interaction as proof. Build a complete feature inventory and mark each element as PASS or FAIL. Fix every failure, re-test to verify, and keep going until every single element passes. Show me the feature inventory with status at every checkpoint.
+
+### Exhaustive Combination Testing (Every Variation)
+
+> Launch this application and run exhaustive combination testing. For every input field, test: empty, valid data, maximum length (10,000+ characters), special characters, Unicode/emoji, XSS payloads, SQL injection strings, and whitespace-only input. For every button, test: single click, double click, rapid clicks, keyboard activation, and clicking while loading. For every dropdown, select every option one by one. For every toggle, switch on/off/on and verify persistence. Build a test matrix of every combination and loop until 100% of the matrix passes. Take a screenshot for every test. Do not stop.
+
+### Post-Redesign Feature Verification
+
+> This application just went through a UI redesign. Launch it and build a complete inventory of every feature, button, link, form, modal, dropdown, toggle, navigation path, and keyboard shortcut. Cross-reference this inventory against the codebase to find anything that existed before but is now missing, broken, unreachable, or visually broken. Test at every viewport size -- mobile (320px), tablet (768px), desktop (1920px), and ultrawide (3440px). Take screenshots at each breakpoint. Fix every discrepancy. After each fix, re-run the full inventory check. Keep going until every feature is confirmed working in the new design.
+
+### Performance Optimization (Frame Rate)
+
+> Launch this application and profile its rendering performance. Measure frame rate, long tasks blocking the main thread, cumulative layout shift, memory usage, and network transfer size. Identify every bottleneck. Fix each one, then re-measure and show me the before/after numbers (e.g., "38 FPS -> 62 FPS"). Take screenshots before and after each optimization to prove zero visual quality loss. If any optimization degrades visual quality or breaks a feature, revert it and try a different approach. Keep optimizing in a loop until frame rate is maximized. Show me a final performance report with all metrics.
+
+### Full Autonomous Improvement (Take Over)
+
+> Take full autonomous control of this application. Launch it, interact with it as a real user would, and continuously improve it. Follow this loop: (1) Use the app and find something wrong, slow, confusing, or missing. (2) Fix it in the code. (3) Re-launch and verify visually with a screenshot. (4) Check that nothing else broke. (5) Commit the improvement. (6) Find the next thing to improve. Keep looping. Fix crashes first, then bugs, then performance, then UX, then accessibility, then polish. Do not ask for permission. Do not stop. Show me a status checkpoint every 5 improvements with screenshots.
+
+### Stress Test the UI
+
+> Launch this application and try to break it. Click buttons during loading states. Submit forms with 10,000-character inputs. Toggle settings rapidly. Navigate back and forward during async operations. Open the same modal twice. Refresh mid-submission. Scroll aggressively during renders. Resize the window during animations. For every crash, freeze, or error you trigger, fix the root cause, verify the fix holds under the same stress condition, take a before/after screenshot, and move on. Keep going until the app handles every abuse case gracefully.
 
 See `QUICKREF.md` for even more prompts.
 
@@ -600,6 +642,8 @@ Two skills the agent loads automatically based on what you ask it to do:
 
 **software-tester** -- For testing running applications via browser interaction (clicks every button, submits every form, navigates every link)
 
+**phantom-depth** -- Advanced autonomous GUI control. Launches the application, takes over mouse and keyboard, captures screenshots as proof, tests every combination/variation of every element, profiles frame rate and rendering performance, verifies UI redesigns, and runs a fully autonomous improvement loop with complete control
+
 ### Layer 3: Test Harness (test-harness.js)
 
 A universal testing script that auto-detects your project type and runs 8 categories of checks. Outputs a structured issue catalog the agent can parse and work through systematically.
@@ -666,6 +710,8 @@ phantom-qa/
           test-harness.js            # Universal test runner (any project type)
       software-tester/
         SKILL.md                     # Interactive UI/application testing
+      phantom-depth/
+        SKILL.md                     # Advanced GUI control, visual testing, perf optimization
   .openclaw/                         # OpenClaw skills
     skills/
       phantom-qa/
@@ -674,6 +720,8 @@ phantom-qa/
           test-harness.js            # Universal test runner (same as above)
       phantom-qa-tester/
         skill.md                     # Interactive testing (OpenClaw format)
+      phantom-depth/
+        skill.md                     # Advanced GUI control (OpenClaw format)
 ```
 
 </details>
